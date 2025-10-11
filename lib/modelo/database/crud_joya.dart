@@ -1,4 +1,4 @@
-import 'package:your_app_name/lib/modelo/products/joya.dart';
+import 'package:casa_joyas/modelo/products/joya.dart';
 
 abstract class JoyaCRUDLogic {
   Future<Joya?> create(Joya joya);

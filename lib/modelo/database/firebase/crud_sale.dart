@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart' as fs; 
-import 'package:casa_joyas/modelo/database/crud_order.dart';
-import 'package:casa_joyas/modelo/products/order.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:casa_joyas/modelo/database/crud_sale.dart';
+import 'package:casa_joyas/modelo/products/sale.dart';
 
 class FirebaseSaleCRUDLogic implements SaleCRUDLogic {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -39,7 +39,7 @@ class FirebaseSaleCRUDLogic implements SaleCRUDLogic {
   }
 }
 
-// Nota: Necesitas añadir el método copyWith al modelo Sale
+
 extension SaleExtension on Sale {
   Sale copyWith({String? id, String? orderId, String? joyaId, int? cantidad, double? precioUnitario, DateTime? fechaVenta}) {
     return Sale(

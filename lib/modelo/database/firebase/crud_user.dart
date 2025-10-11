@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:your_app_name/lib/modelo/database/crud_user.dart';
-import 'package:your_app_name/lib/modelo/products/user.dart';
+import 'package:casa_joyas/modelo/database/crud_user.dart';
+import 'package:casa_joyas/modelo/products/user.dart';
 
 class FirebaseUserCRUDLogic implements UserCRUDLogic {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

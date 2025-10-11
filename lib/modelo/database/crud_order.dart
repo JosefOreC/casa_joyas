@@ -1,4 +1,4 @@
-import 'package:your_app_name/lib/modelo/products/order.dart';
+import 'package:casa_joyas/modelo/products/order.dart';
 
 abstract class OrderCRUDLogic {
   Future<Order?> create(Order order);

@@ -1,4 +1,4 @@
-import 'package:your_app_name/lib/modelo/products/sale.dart';
+import 'package:casa_joyas/modelo/products/sale.dart';
 
 abstract class SaleCRUDLogic {
   Future<Sale?> create(Sale sale);

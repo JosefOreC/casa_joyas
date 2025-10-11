@@ -1,4 +1,4 @@
-import 'package:casa_joyas/lib/modelo/products/user.dart';
+import 'package:casa_joyas/modelo/products/user.dart';
 
 abstract class UserCRUDLogic {
   Future<User?> create(User user);
