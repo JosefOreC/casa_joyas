@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "515728386769",
+    "project_id": "casajoyasf",
+    "storage_bucket": "casajoyasf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515728386769:android:048aa8ac054dda5679b3f0",
+        "android_client_info": {
+          "package_name": "com.example.casa_joyas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmSKGy1ElqSEBziF1jxlymPxORal7cjZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
