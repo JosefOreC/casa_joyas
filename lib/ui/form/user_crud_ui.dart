@@ -93,16 +93,3 @@ class UserCRUDScreen extends StatelessWidget {
     );
   }
 }
-
-extension UserCopyExtension on User {
-  User copyWith({String? id, String? nombre, String? email, String? password, String? numero, UserRole? rol}) {
-    return User(
-      id: id ?? this.id,
-      nombre: nombre ?? this.nombre,
-      email: email ?? this.email,
-      password: password ?? this.password,
-      numero: numero ?? this.numero,
-      rol: rol ?? this.rol,
-    );
-  }
-}

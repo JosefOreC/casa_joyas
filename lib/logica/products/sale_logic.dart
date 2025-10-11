@@ -29,6 +29,16 @@ class SaleLogic extends ChangeNotifier {
       _setLoading(false);
     }
   }
-  
-  // Las ventas son registros inmutables. Solo se implementa la lectura.
+  Future<Sale?> addSale(Sale sale) async {
+    try {
+      final newSale = await _saleRepo.create(sale);
+      if (newSale != null) {
+        _sales.add(newSale);
+        notifyListeners(); 
+      }
+      return newSale;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

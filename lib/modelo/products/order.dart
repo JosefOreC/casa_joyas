@@ -1,5 +1,3 @@
-// lib/modelo/products/order.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Order {
@@ -53,12 +51,14 @@ class OrderItem {
   final String joyaNombre;
   final int cantidad;
   final double precioUnitario;
+  final String? especificaciones; // Campo de personalización
 
   OrderItem({
     required this.joyaId,
     required this.joyaNombre,
     required this.cantidad,
     required this.precioUnitario,
+    this.especificaciones,
   });
 
   factory OrderItem.fromMap(Map<String, dynamic> data) {
@@ -67,6 +67,7 @@ class OrderItem {
       joyaNombre: data['joyaNombre'] ?? '',
       cantidad: data['cantidad'] ?? 0,
       precioUnitario: (data['precioUnitario'] as num?)?.toDouble() ?? 0.0,
+      especificaciones: data['especificaciones'],
     );
   }
 
@@ -76,6 +77,7 @@ class OrderItem {
       'joyaNombre': joyaNombre,
       'cantidad': cantidad,
       'precioUnitario': precioUnitario,
+      'especificaciones': especificaciones,
     };
   }
 }

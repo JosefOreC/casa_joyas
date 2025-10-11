@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/firebase_options.dart';
-import 'package:casa_joyas/ui/auth/login.dart';
+import 'package:casa_joyas/ui/shop/main_screen.dart'; 
 
 import 'package:casa_joyas/modelo/database/crud_user.dart';
 import 'package:casa_joyas/modelo/database/crud_joya.dart';
@@ -14,12 +14,12 @@ import 'package:casa_joyas/modelo/database/firebase/crud_joya.dart';
 import 'package:casa_joyas/modelo/database/firebase/crud_order.dart';
 import 'package:casa_joyas/modelo/database/firebase/crud_sale.dart';
 
-
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:casa_joyas/logica/products/user_logic.dart';
 import 'package:casa_joyas/logica/products/joya_logic.dart';
 import 'package:casa_joyas/logica/products/order_logic.dart';
 import 'package:casa_joyas/logica/products/sale_logic.dart';
+import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart'; 
 
 
 void main() async {
@@ -67,6 +67,13 @@ class MyApp extends StatelessWidget {
             Provider.of<SaleCRUDLogic>(context, listen: false), 
           ),
         ),
+        ChangeNotifierProvider<ShoppingCartLogic>(
+          create: (context) => ShoppingCartLogic(
+            Provider.of<OrderLogic>(context, listen: false),
+            Provider.of<SaleLogic>(context, listen: false), 
+            Provider.of<AuthLogic>(context, listen: false), 
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'Mi Tienda Online',
@@ -74,7 +81,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.deepPurple,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: LoginScreen(),
+        home: MainScreen(), 
       ),
     );
   }

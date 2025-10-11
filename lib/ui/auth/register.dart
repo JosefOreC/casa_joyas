@@ -75,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             else
               ElevatedButton(
                 onPressed: _register,
-                child: Text('Registrarse como Cliente'),
+                child: Text('Registrarse'),
               ),
           ],
         ),

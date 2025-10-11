@@ -18,7 +18,7 @@ class AuthLogic extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(String email, String password, String nombre, String? numero) async {
+   Future<void> register(String email, String password, String nombre, String? numero) async {
     _setLoading(true);
     try {
       final user = await _userRepo.registerUser(

@@ -29,6 +29,20 @@ class OrderLogic extends ChangeNotifier {
       _setLoading(false);
     }
   }
+  Future<Order?> addOrder(Order order) async {
+    try {
+      
+      final newOrder = await _orderRepo.create(order);
+      if (newOrder != null) {
+        _orders.add(newOrder);
+        
+        notifyListeners(); 
+      }
+      return newOrder;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   Future<void> updateOrder(Order order) async {
     _setLoading(true);
@@ -37,8 +51,8 @@ class OrderLogic extends ChangeNotifier {
     } catch (e) {
       rethrow;
     } finally {
-      fetchOrders();
+      
+      fetchOrders(); 
     }
   }
-  
 }

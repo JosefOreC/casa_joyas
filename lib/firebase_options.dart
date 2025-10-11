@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'casajoyasf.firebasestorage.app',
     measurementId: 'G-2P7C3PTRKL',
   );
+
 }

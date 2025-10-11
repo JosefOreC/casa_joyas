@@ -32,7 +32,7 @@ class User {
       id: id,
       nombre: data['nombre'] ?? '',
       email: data['email'] ?? '',
-      password: '',
+      password: data['password'] ?? '', 
       numero: data['numero'],
       rol: userRol,
     );
@@ -44,6 +44,20 @@ class User {
       'email': email,
       'numero': numero,
       'rol': rol.name,
+      'password': password,
     };
+  }
+}
+
+extension UserCopyExtension on User {
+  User copyWith({String? id, String? nombre, String? email, String? password, String? numero, UserRole? rol}) {
+    return User(
+      id: id ?? this.id,
+      nombre: nombre ?? this.nombre,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      numero: numero ?? this.numero,
+      rol: rol ?? this.rol,
+    );
   }
 }
