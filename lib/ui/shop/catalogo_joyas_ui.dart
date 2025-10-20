@@ -38,10 +38,10 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
           child: GridView.builder(
             padding: const EdgeInsets.all(10),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // dos columnas
+              crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              childAspectRatio: 0.75, // relación ancho/alto
+              childAspectRatio: 0.75,
             ),
             itemCount: joyasPagina.length,
             itemBuilder: (context, index) {
