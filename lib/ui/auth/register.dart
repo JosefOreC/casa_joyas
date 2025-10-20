@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }

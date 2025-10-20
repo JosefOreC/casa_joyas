@@ -4,7 +4,7 @@ import 'package:casa_joyas/modelo/products/joya.dart';
 
 class FirebaseJoyaCRUDLogic implements JoyaCRUDLogic {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collectionName = 'jewels';
+  final String _collectionName = 'joya';
 
   @override
   Future<Joya?> create(Joya joya) async {
@@ -40,7 +40,7 @@ class FirebaseJoyaCRUDLogic implements JoyaCRUDLogic {
 }
 
 extension JoyaExtension on Joya {
-  Joya copyWith({String? id, String? nombre, String? descripcion, double? precio, int? stock, String? imageUrl}) {
+  Joya copyWith({String? id, String? nombre, String? descripcion, double? precio, int? stock, String? imageUrl, String? material, String? tipo}) {
     return Joya(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
@@ -48,6 +48,8 @@ extension JoyaExtension on Joya {
       precio: precio ?? this.precio,
       stock: stock ?? this.stock,
       imageUrl: imageUrl ?? this.imageUrl,
+      material: material ?? this.material,
+      tipo: tipo ?? this.tipo,
     );
   }
 }

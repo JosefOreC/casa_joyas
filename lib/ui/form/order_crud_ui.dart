@@ -29,7 +29,7 @@ class OrderCRUDScreen extends StatelessWidget {
                 ...order.items.map((item) => Text('${item.joyaNombre} (x${item.cantidad}) - S/. ${item.precioUnitario.toStringAsFixed(2)}')),
                 const Divider(),
                 DropdownButtonFormField<String>(
-                  value: order.estado,
+                  initialValue: order.estado,
                   items: _estados
                       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                       .toList(),

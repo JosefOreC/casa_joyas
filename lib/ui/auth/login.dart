@@ -4,6 +4,8 @@ import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:casa_joyas/ui/auth/register.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }

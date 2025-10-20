@@ -16,6 +16,8 @@ class _JoyaCRUDScreenState extends State<JoyaCRUDScreen> {
   final _precioController = TextEditingController();
   final _stockController = TextEditingController();
   final _imageUrlController = TextEditingController();
+  final _materialController = TextEditingController();
+  final _tipoController = TextEditingController();
 
   String? _idSeleccionado;
 
@@ -26,6 +28,8 @@ class _JoyaCRUDScreenState extends State<JoyaCRUDScreen> {
     _precioController.dispose();
     _stockController.dispose();
     _imageUrlController.dispose();
+    _materialController.dispose();
+    _tipoController.dispose();
     super.dispose();
   }
 
@@ -35,6 +39,8 @@ class _JoyaCRUDScreenState extends State<JoyaCRUDScreen> {
     _precioController.clear();
     _stockController.clear();
     _imageUrlController.clear();
+    _materialController.clear();
+    _tipoController.clear();
     setState(() {
       _idSeleccionado = null;
     });
@@ -48,6 +54,8 @@ class _JoyaCRUDScreenState extends State<JoyaCRUDScreen> {
       _precioController.text = joya.precio.toString();
       _stockController.text = joya.stock.toString();
       _imageUrlController.text = joya.imageUrl;
+      _materialController.text = joya.material;
+      _tipoController.text = joya.tipo;
     });
   }
 
@@ -57,6 +65,8 @@ class _JoyaCRUDScreenState extends State<JoyaCRUDScreen> {
     final precio = double.tryParse(_precioController.text.trim()) ?? 0.0;
     final stock = int.tryParse(_stockController.text.trim()) ?? 0;
     final imageUrl = _imageUrlController.text.trim();
+    final material = _materialController.text.trim();
+    final tipo = _tipoController.text.trim();
 
     if (nombre.isEmpty || descripcion.isEmpty || precio <= 0 || stock < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -72,6 +82,8 @@ class _JoyaCRUDScreenState extends State<JoyaCRUDScreen> {
       precio: precio,
       stock: stock,
       imageUrl: imageUrl,
+      material: material,
+      tipo: tipo,
     );
 
     try {
@@ -109,6 +121,8 @@ class _JoyaCRUDScreenState extends State<JoyaCRUDScreen> {
             TextField(controller: _precioController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Precio')),
             TextField(controller: _stockController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Stock')),
             TextField(controller: _imageUrlController, decoration: const InputDecoration(labelText: 'URL Imagen')),
+            TextField(controller: _materialController, decoration: const InputDecoration(labelText: 'Material')),
+            TextField(controller: _tipoController, decoration: const InputDecoration(labelText: 'Tipo')),
             
             const SizedBox(height: 16),
             
@@ -138,24 +152,53 @@ class _JoyaCRUDScreenState extends State<JoyaCRUDScreen> {
                     itemBuilder: (context, index) {
                       final joya = joyaLogic.joyas[index];
                       return Card(
-                        child: ListTile(
-                          title: Text(joya.nombre),
-                          subtitle: Text('Precio: S/. ${joya.precio.toStringAsFixed(2)} | Stock: ${joya.stock}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () => _editarJoya(joya),
+                          elevation: 4,
+                          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(8),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                joya.imageUrl.isNotEmpty
+                                    ? joya.imageUrl
+                                    : 'https://via.placeholder.com/100',
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.redAccent),
-                                onPressed: () => _eliminarJoya(joyaLogic, joya.id),
-                              ),
-                            ],
+                            ),
+                            title: Text(
+                              joya.nombre,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Precio: S/. ${joya.precio.toStringAsFixed(2)}',
+                                  style: const TextStyle(color: Colors.pinkAccent),
+                                ),
+                                Text(
+                                  'Stock: ${joya.stock}',
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () => _editarJoya(joya),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                  onPressed: () => _eliminarJoya(joyaLogic, joya.id),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
+                        );
                     },
                   );
                 },

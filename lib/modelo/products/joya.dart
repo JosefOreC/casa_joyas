@@ -5,6 +5,8 @@ class Joya {
   final double precio;
   final int stock;
   final String imageUrl;
+  final String tipo;
+  final String material;
 
   Joya({
     required this.id,
@@ -13,6 +15,8 @@ class Joya {
     required this.precio,
     required this.stock,
     required this.imageUrl,
+    required this.material,
+    required this.tipo,
   });
 
   factory Joya.fromMap(Map<String, dynamic> data, String id) {
@@ -23,6 +27,8 @@ class Joya {
       precio: (data['precio'] as num?)?.toDouble() ?? 0.0,
       stock: data['stock'] ?? 0,
       imageUrl: data['imageUrl'] ?? '',
+      material: data['material'] ?? '',
+      tipo: data['tipo'] ?? '',
     );
   }
 
@@ -33,6 +39,8 @@ class Joya {
       'precio': precio,
       'stock': stock,
       'imageUrl': imageUrl,
+      'material': material,
+      'tipo': tipo,
     };
   }
 }

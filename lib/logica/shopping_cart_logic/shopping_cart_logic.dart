@@ -11,7 +11,7 @@ class ShoppingCartLogic extends ChangeNotifier {
   final SaleLogic _saleLogic; 
   final AuthLogic _authLogic;
   
-  List<OrderItem> _items = [];
+  final List<OrderItem> _items = [];
   bool _isProcessingOrder = false;
 
   ShoppingCartLogic(this._orderLogic, this._saleLogic, this._authLogic); 

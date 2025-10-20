@@ -4,6 +4,7 @@ import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 import 'package:casa_joyas/ui/shop/main_screen.dart';
 import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
+import 'package:casa_joyas/ui/shop/catalogo_joyas_ui.dart';
 
 class ClientHome extends StatelessWidget {
   const ClientHome({super.key});
@@ -18,7 +19,6 @@ class ClientHome extends StatelessWidget {
         title: const Text('Catálogo de Joyas'),
         backgroundColor: Colors.pinkAccent,
         actions: [
-          // Botón del Carrito
           Stack(
             children: [
               IconButton(
@@ -53,28 +53,18 @@ class ClientHome extends StatelessWidget {
                 ),
             ],
           ),
-          // Botón de Cierre de Sesión
           IconButton(
             icon: const Icon(Icons.exit_to_app),
             onPressed: () async {
               await authLogic.signOut();
-              // Vuelve al router principal (MainScreen) para forzar la redirección al Login
               Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
             },
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Bienvenido, ${authLogic.currentUser!.nombre}!', style: const TextStyle(fontSize: 18)),
-            Text('Rol: ${authLogic.currentUser!.rol.name.toUpperCase()}', style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 40),
-            // Aquí iría el GridView o ListView del catálogo de joyas usando JoyaLogic
-            const Text('--- Catálogo de Joyas ---', style: TextStyle(fontStyle: FontStyle.italic)),
-          ],
-        ),
+      body: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: CatalogoJoyasScreen(),
       ),
     );
   }

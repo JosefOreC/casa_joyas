@@ -4,7 +4,7 @@ import 'package:casa_joyas/modelo/products/order.dart';
 
 class FirebaseOrderCRUDLogic implements OrderCRUDLogic {
   final fs.FirebaseFirestore _firestore = fs.FirebaseFirestore.instance;
-  final String _collectionName = 'orders';
+  final String _collectionName = 'orden';
 
   @override
   Future<Order?> create(Order order) async {

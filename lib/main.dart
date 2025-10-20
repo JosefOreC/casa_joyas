@@ -22,6 +22,7 @@ import 'package:casa_joyas/logica/products/sale_logic.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart'; 
 
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -33,6 +34,8 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -40,8 +43,7 @@ class MyApp extends StatelessWidget {
         Provider<UserCRUDLogic>(create: (_) => FirebaseUserCRUDLogic()),
         Provider<JoyaCRUDLogic>(create: (_) => FirebaseJoyaCRUDLogic()),
         Provider<OrderCRUDLogic>(create: (_) => FirebaseOrderCRUDLogic()),
-        Provider<SaleCRUDLogic>(create: (_) => FirebaseSaleCRUDLogic()),
-        
+        Provider<SaleCRUDLogic>(create: (_) => FirebaseSaleCRUDLogic()),        
         ChangeNotifierProvider<AuthLogic>(
           create: (context) => AuthLogic(
             Provider.of<UserCRUDLogic>(context, listen: false), 

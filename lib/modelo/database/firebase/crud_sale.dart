@@ -4,7 +4,7 @@ import 'package:casa_joyas/modelo/products/sale.dart';
 
 class FirebaseSaleCRUDLogic implements SaleCRUDLogic {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collectionName = 'sales';
+  final String _collectionName = 'venta';
 
   @override
   Future<Sale?> create(Sale sale) async {

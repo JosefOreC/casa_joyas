@@ -15,7 +15,7 @@ class UserCRUDScreen extends StatelessWidget {
         return AlertDialog(
           title: Text('Editar Rol de ${user.nombre}'),
           content: DropdownButtonFormField<UserRole>(
-            value: rolSeleccionado,
+            initialValue: rolSeleccionado,
             items: UserRole.values
                 .map((rol) => DropdownMenuItem(
                       value: rol,
