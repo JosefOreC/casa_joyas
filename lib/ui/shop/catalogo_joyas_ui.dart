@@ -14,6 +14,74 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
   int _currentPage = 0;
   final int _itemsPerPage = 6;
 
+  void add_shop_cart(Joya joya){
+    if (joya.stock.toInt() <= 0){
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lo siento, este producto no cuenta con stock.'), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        int selectedQuantity = 1;
+        return AlertDialog(
+          title: Text('Selecciona la cantidad'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Cantidad disponible: ${joya.stock.toInt()}'),
+              TextField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Cantidad',
+                  hintText: '1',
+                ),
+                onChanged: (value) {
+                  int parsedValue = int.tryParse(value) ?? 1;
+                  if (parsedValue < 1) {
+                    selectedQuantity = 1;
+                  }
+                  else if(parsedValue <= joya.stock){
+                    selectedQuantity = parsedValue;
+                  }
+                  else if(parsedValue > joya.stock){
+                    selectedQuantity = parsedValue;
+                  }
+                },
+                controller: TextEditingController(text: selectedQuantity.toString()),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {   
+                Navigator.of(context).pop();       
+                if (selectedQuantity<0 || selectedQuantity > joya.stock){
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('La cantidad de productos no puede ser mayor al stock ni 0.'), backgroundColor: Colors.redAccent),
+                    );
+                }else{
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Agregaste $selectedQuantity ${joya.nombre}(s) al carrito.')),
+                  );
+                }
+              },
+              child: const Text('Confirmar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final joyaLogic = Provider.of<JoyaLogic>(context);
@@ -101,9 +169,19 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
                 Text(joya.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text(
-                  'S/. ${joya.precio.toStringAsFixed(2)}',
-                  style: const TextStyle(color: Colors.pinkAccent),
-                ),
+                      'S/. ${joya.precio.toStringAsFixed(2)}    ',
+                      style: const TextStyle(color: Colors.pinkAccent),
+                      ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(joya.stock.toString()+" disponibles", style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 11)),
+                    Text("  "),
+                  ElevatedButton(
+                    onPressed: () => add_shop_cart(joya), 
+                    child: const Icon(Icons.shopping_cart)),
+                ]),
+                
               ],
             ),
           ),

@@ -1,6 +1,6 @@
 class Joya {
   final String id;
-  final String nombre;
+  String nombre;
   final String descripcion;
   final double precio;
   final int stock;

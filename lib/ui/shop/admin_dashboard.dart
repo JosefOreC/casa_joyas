@@ -35,17 +35,17 @@ class AdminDashboard extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.diamond, color: Colors.blue),
-            title: const Text('CRUD Joyas (Inventario)'),
+            title: const Text('Inventario'),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const JoyaCRUDScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.people, color: Colors.blueGrey),
-            title: const Text('CRUD Usuarios (Roles)'),
+            title: const Text('Usuarios'),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UserCRUDScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.local_shipping, color: Colors.orange),
-            title: const Text('CRUD Órdenes (Gestión de Envíos)'),
+            title: const Text('Gestión de Órdenes'),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const OrderCRUDScreen())),
           ),
           ListTile(
