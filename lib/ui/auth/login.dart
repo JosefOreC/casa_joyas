@@ -18,11 +18,21 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     final authLogic = Provider.of<AuthLogic>(context, listen: false);
 
-    try {
-      await authLogic.signIn(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
+    var email = _emailController.text.trim();
+    var password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Complete todos los campos para el inicio de sesion'),
+          backgroundColor: Colors.redAccent,
+        ),
       );
+      return;
+    }
+
+    try {
+      await authLogic.signIn(email, password);
       if (authLogic.isAuthenticated && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Inicio de sesión exitoso. ¡Bienvenido!')),
@@ -61,13 +71,12 @@ class _LoginScreenState extends State<LoginScreen> {
             if (authLogic.isLoading)
               CircularProgressIndicator()
             else
-              ElevatedButton(
-                onPressed: _login,
-                child: Text('Iniciar Sesión'),
-              ),
+              ElevatedButton(onPressed: _login, child: Text('Iniciar Sesión')),
             TextButton(
               onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegisterScreen()));
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => RegisterScreen()));
               },
               child: Text('¿No tienes cuenta? Regístrate'),
             ),
