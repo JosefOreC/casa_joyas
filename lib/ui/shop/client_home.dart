@@ -2,69 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
-import 'package:casa_joyas/ui/shop/main_screen.dart';
-import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
-import 'package:casa_joyas/ui/shop/catalogo_joyas_ui.dart';
+import 'package:casa_joyas/ui/shop/joya_part_screen.dart';
+import 'package:casa_joyas/ui/shop/pedidos_screen.dart';
+import 'package:casa_joyas/ui/user/perfil_screen.dart';
 
-class ClientHome extends StatelessWidget {
+class ClientHome extends StatefulWidget {
   const ClientHome({super.key});
 
   @override
+  State<ClientHome> createState() => _ClientHomeState();
+}
+
+class _ClientHomeState extends State<ClientHome> {
+  int _selectedIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
+    
     final authLogic = Provider.of<AuthLogic>(context);
     final cartLogic = Provider.of<ShoppingCartLogic>(context);
 
+    
+    final List<Widget> pages = [
+      JoyaPartScreen(),   
+      PedidosScreen(authLogic: authLogic),   
+      PerfilScreen(authLogic: authLogic), 
+    ];
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catálogo de Joyas'),
-        backgroundColor: Colors.pinkAccent,
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ShoppingCartScreen()));
-                },
-              ),
-              if (cartLogic.items.isNotEmpty)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '${cartLogic.items.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
+      body: pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.diamond_outlined),
+            label: 'Joyas',
           ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () async {
-              await authLogic.signOut();
-              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
-            },
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag_outlined),
+            label: 'Pedidos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Perfil',
           ),
         ],
-      ),
-      body: const Padding(
-        padding: EdgeInsets.all(8.0),
-        child: CatalogoJoyasScreen(),
       ),
     );
   }

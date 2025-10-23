@@ -12,7 +12,7 @@ class CatalogoJoyasScreen extends StatefulWidget {
 
 class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
   int _currentPage = 0;
-  final int _itemsPerPage = 6;
+  final int _itemsPerPage = 10;
 
   void add_shop_cart(Joya joya){
     if (joya.stock.toInt() <= 0){
@@ -170,7 +170,7 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
                 const SizedBox(height: 4),
                 Text(
                       'S/. ${joya.precio.toStringAsFixed(2)}    ',
-                      style: const TextStyle(color: Colors.pinkAccent),
+                      style: const TextStyle(color: Color.fromARGB(255, 10, 26, 252)),
                       ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
