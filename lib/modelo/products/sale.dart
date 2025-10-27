@@ -4,6 +4,7 @@ class Sale {
   final String id;
   final String orderId;
   final String joyaId;
+  final String joyaURL;
   final int cantidad;
   final double precioUnitario;
   final DateTime fechaVenta;
@@ -12,6 +13,7 @@ class Sale {
     required this.id,
     required this.orderId,
     required this.joyaId,
+    required this.joyaURL,
     required this.cantidad,
     required this.precioUnitario,
     required this.fechaVenta,
@@ -25,6 +27,7 @@ class Sale {
       id: id,
       orderId: data['orderId'] ?? '',
       joyaId: data['joyaId'] ?? '',
+      joyaURL: data['joyaURL'] ?? '',
       cantidad: data['cantidad'] ?? 0,
       precioUnitario: (data['precioUnitario'] as num?)?.toDouble() ?? 0.0,
       fechaVenta: date,
@@ -35,6 +38,7 @@ class Sale {
     return {
       'orderId': orderId,
       'joyaId': joyaId,
+      'joyaURL': joyaURL,
       'cantidad': cantidad,
       'precioUnitario': precioUnitario,
       'fechaVenta': fechaVenta,

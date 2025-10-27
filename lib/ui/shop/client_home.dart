@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
-import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 import 'package:casa_joyas/ui/shop/joya_part_screen.dart';
 import 'package:casa_joyas/ui/shop/pedidos_screen.dart';
 import 'package:casa_joyas/ui/user/perfil_screen.dart';
@@ -20,7 +19,6 @@ class _ClientHomeState extends State<ClientHome> {
   Widget build(BuildContext context) {
     
     final authLogic = Provider.of<AuthLogic>(context);
-    final cartLogic = Provider.of<ShoppingCartLogic>(context);
 
     
     final List<Widget> pages = [

@@ -49,6 +49,7 @@ class Order {
 class OrderItem {
   final String joyaId;
   final String joyaNombre;
+  final String joyaURL;
   final int cantidad;
   final double precioUnitario;
   final String? especificaciones; // Campo de personalización
@@ -56,6 +57,7 @@ class OrderItem {
   OrderItem({
     required this.joyaId,
     required this.joyaNombre,
+    required this.joyaURL,
     required this.cantidad,
     required this.precioUnitario,
     this.especificaciones,
@@ -65,6 +67,7 @@ class OrderItem {
     return OrderItem(
       joyaId: data['joyaId'] ?? '',
       joyaNombre: data['joyaNombre'] ?? '',
+      joyaURL: data['joyaURL'] ?? '',
       cantidad: data['cantidad'] ?? 0,
       precioUnitario: (data['precioUnitario'] as num?)?.toDouble() ?? 0.0,
       especificaciones: data['especificaciones'],
@@ -75,6 +78,7 @@ class OrderItem {
     return {
       'joyaId': joyaId,
       'joyaNombre': joyaNombre,
+      'joyaURL': joyaURL,
       'cantidad': cantidad,
       'precioUnitario': precioUnitario,
       'especificaciones': especificaciones,

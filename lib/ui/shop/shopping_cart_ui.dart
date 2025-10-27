@@ -39,8 +39,9 @@ class ShoppingCartScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mi Carrito de Compras'),
-        backgroundColor: Colors.pinkAccent,
+        title: const Text('CASA DE LAS JOYAS'),
+        foregroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 36, 15, 230),
       ),
       body: cartLogic.items.isEmpty
           ? const Center(
@@ -83,19 +84,19 @@ class ShoppingCartScreen extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Botón para disminuir cantidad
+           
             IconButton(
               icon: const Icon(Icons.remove_circle_outline),
               onPressed: () => cartLogic.updateItemQuantity(item.joyaId, item.cantidad - 1),
             ),
-            // Cantidad
+            
             Text('${item.cantidad}', style: const TextStyle(fontWeight: FontWeight.bold)),
-            // Botón para aumentar cantidad
+            
             IconButton(
               icon: const Icon(Icons.add_circle_outline),
               onPressed: () => cartLogic.updateItemQuantity(item.joyaId, item.cantidad + 1),
             ),
-            // Botón para eliminar completamente
+           
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () => cartLogic.removeItem(item.joyaId),
@@ -122,7 +123,7 @@ class ShoppingCartScreen extends StatelessWidget {
               const Text('TOTAL:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Text(
                 'S/. ${cartLogic.total.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.pink),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 36, 15, 230)),
               ),
             ],
           ),
@@ -138,7 +139,8 @@ class ShoppingCartScreen extends StatelessWidget {
                   : const Icon(Icons.payment),
               label: Text(cartLogic.isProcessingOrder ? 'Procesando...' : 'FINALIZAR PEDIDO'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.pinkAccent,
+                backgroundColor: const Color.fromARGB(255, 36, 15, 230),
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
             ),

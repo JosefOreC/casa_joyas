@@ -46,6 +46,7 @@ extension SaleExtension on Sale {
       id: id ?? this.id,
       orderId: orderId ?? this.orderId,
       joyaId: joyaId ?? this.joyaId,
+      joyaURL: joyaURL,
       cantidad: cantidad ?? this.cantidad,
       precioUnitario: precioUnitario ?? this.precioUnitario,
       fechaVenta: fechaVenta ?? this.fechaVenta,

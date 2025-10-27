@@ -33,6 +33,7 @@ class ShoppingCartLogic extends ChangeNotifier {
       _items[existingIndex] = OrderItem(
         joyaId: joya.id,
         joyaNombre: joya.nombre,
+        joyaURL: joya.imageUrl,
         cantidad: existingItem.cantidad + cantidad,
         precioUnitario: joya.precio,
         especificaciones: especificaciones ?? existingItem.especificaciones,
@@ -41,6 +42,7 @@ class ShoppingCartLogic extends ChangeNotifier {
       _items.add(OrderItem(
         joyaId: joya.id,
         joyaNombre: joya.nombre,
+        joyaURL: joya.imageUrl,
         cantidad: cantidad,
         precioUnitario: joya.precio,
         especificaciones: especificaciones,
@@ -61,6 +63,7 @@ class ShoppingCartLogic extends ChangeNotifier {
       _items[index] = OrderItem(
         joyaId: existingItem.joyaId,
         joyaNombre: existingItem.joyaNombre,
+        joyaURL: existingItem.joyaURL,
         cantidad: newQuantity,
         precioUnitario: existingItem.precioUnitario,
         especificaciones: existingItem.especificaciones,
@@ -98,6 +101,7 @@ class ShoppingCartLogic extends ChangeNotifier {
             id: '', 
             orderId: createdOrder.id,
             joyaId: item.joyaId,
+            joyaURL: item.joyaURL,
             cantidad: item.cantidad,
             precioUnitario: item.precioUnitario,
             fechaVenta: transactionDate,

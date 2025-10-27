@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/products/joya_logic.dart';
 import 'package:casa_joyas/modelo/products/joya.dart';
+import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 
 class CatalogoJoyasScreen extends StatefulWidget {
   const CatalogoJoyasScreen({super.key});
-
   @override
   State<CatalogoJoyasScreen> createState() => _CatalogoJoyasScreenState();
 }
 
 class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
   int _currentPage = 0;
-  final int _itemsPerPage = 10;
-
-  void add_shop_cart(Joya joya){
+  final int _itemsPerPage = 50;
+  
+  void add_shop_cart(BuildContext context, Joya joya){
+    final cartLogic = Provider.of<ShoppingCartLogic>(context, listen: false);
     if (joya.stock.toInt() <= 0){
        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lo siento, este producto no cuenta con stock.'), backgroundColor: Colors.redAccent),
@@ -31,6 +32,15 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Image.network(
+                    joya.imageUrl.isNotEmpty ? joya.imageUrl : 'https://via.placeholder.com/150',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
               Text('Cantidad disponible: ${joya.stock.toInt()}'),
               TextField(
                 keyboardType: TextInputType.number,
@@ -66,6 +76,7 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Agregaste $selectedQuantity ${joya.nombre}(s) al carrito.')),
                   );
+                  cartLogic.addItem(joya);
                 }
               },
               child: const Text('Confirmar'),
@@ -178,7 +189,7 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
                     Text(joya.stock.toString()+" disponibles", style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 11)),
                     Text("  "),
                   ElevatedButton(
-                    onPressed: () => add_shop_cart(joya), 
+                    onPressed: () => add_shop_cart(context, joya), 
                     child: const Icon(Icons.shopping_cart)),
                 ]),
                 
