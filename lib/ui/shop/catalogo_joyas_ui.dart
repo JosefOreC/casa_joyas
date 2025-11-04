@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/products/joya_logic.dart';
 import 'package:casa_joyas/modelo/products/joya.dart';
+import 'package:casa_joyas/ui/shop/joya_detail_ui.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 
 class CatalogoJoyasScreen extends StatefulWidget {
@@ -157,46 +158,57 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
   }
 
   Widget _buildJoyaCard(Joya joya) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.network(
-                joya.imageUrl.isNotEmpty ? joya.imageUrl : 'https://via.placeholder.com/150',
-                fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        // Al hacer tap, navegamos a la pantalla de detalle
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => JoyaDetailScreen(joya: joya),
+          ),
+        );
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 4,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.network(
+                  joya.imageUrl.isNotEmpty ? joya.imageUrl : 'https://via.placeholder.com/150',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(joya.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text(
-                      'S/. ${joya.precio.toStringAsFixed(2)}    ',
-                      style: const TextStyle(color: Color.fromARGB(255, 10, 26, 252)),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(joya.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'S/. ${joya.precio.toStringAsFixed(2)}',
+                    style: const TextStyle(color: Color.fromARGB(255, 10, 26, 252)),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('${joya.stock} disponibles', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 11)),
+                      Text("  "),
+                      ElevatedButton(
+                        onPressed: () => add_shop_cart(context, joya),
+                        child: const Icon(Icons.shopping_cart),
                       ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(joya.stock.toString()+" disponibles", style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 11)),
-                    Text("  "),
-                  ElevatedButton(
-                    onPressed: () => add_shop_cart(context, joya), 
-                    child: const Icon(Icons.shopping_cart)),
-                ]),
-                
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
