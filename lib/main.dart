@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Mi Tienda Online',
+        title: 'CASA DE LAS JOYAS',
         theme: ThemeData(
           primarySwatch: Colors.deepPurple,
           visualDensity: VisualDensity.adaptivePlatformDensity,

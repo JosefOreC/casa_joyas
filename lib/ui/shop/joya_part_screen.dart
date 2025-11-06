@@ -14,7 +14,7 @@
       final authLogic = Provider.of<AuthLogic>(context);
       final cartLogic = Provider.of<ShoppingCartLogic>(context);
 
-      final List<Widget> _pages = [
+      final List<Widget> pages = [
         Scaffold(
           appBar: AppBar(
             title: const Text('CASA DE LAS JOYAS'),
@@ -79,6 +79,6 @@
         ),
       ];
 
-      return _pages[0];
+      return pages[0];
     }
   }

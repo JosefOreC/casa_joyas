@@ -1,172 +1,355 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/products/joya_logic.dart';
+import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 import 'package:casa_joyas/modelo/products/joya.dart';
 import 'package:casa_joyas/ui/shop/joya_detail_ui.dart';
-import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 
 class CatalogoJoyasScreen extends StatefulWidget {
   const CatalogoJoyasScreen({super.key});
+
   @override
   State<CatalogoJoyasScreen> createState() => _CatalogoJoyasScreenState();
 }
 
 class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
-  int _currentPage = 0;
-  final int _itemsPerPage = 50;
-  
-  void add_shop_cart(BuildContext context, Joya joya){
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+
+  int _visibleItems = 10;
+  bool _isLoadingMore = false;
+
+  String _selectedTipo = 'Todos';
+  String _selectedMaterial = 'Todos';
+  String _sortBy = 'Nombre (A-Z)';
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !_isLoadingMore) {
+      _loadMoreItems();
+    }
+  }
+
+  Future<void> _loadMoreItems() async {
+    setState(() => _isLoadingMore = true);
+    await Future.delayed(const Duration(milliseconds: 400));
+    setState(() {
+      _visibleItems += 10;
+      _isLoadingMore = false;
+    });
+  }
+
+  Future<void> _refreshJoyas() async {
+    final joyaLogic = Provider.of<JoyaLogic>(context, listen: false);
+    await joyaLogic.fetchJoyas();
+    setState(() {
+      _visibleItems = 10;
+    });
+  }
+
+  void _addShopCart(BuildContext context, Joya joya) {
     final cartLogic = Provider.of<ShoppingCartLogic>(context, listen: false);
-    if (joya.stock.toInt() <= 0){
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lo siento, este producto no cuenta con stock.'), backgroundColor: Colors.redAccent),
+
+    if (joya.stock <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lo siento, este producto no cuenta con stock.'),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
-    
+
     showDialog(
       context: context,
       builder: (context) {
-        int selectedQuantity = 1;
-        return AlertDialog(
-          title: Text('Selecciona la cantidad'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        int cantidad = 1;
+        return StatefulBuilder(builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: Text(joya.nombre),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
                   child: Image.network(
-                    joya.imageUrl.isNotEmpty ? joya.imageUrl : 'https://via.placeholder.com/150',
+                    joya.imageUrl.isNotEmpty
+                        ? joya.imageUrl
+                        : 'https://via.placeholder.com/150',
+                    height: 120,
                     fit: BoxFit.cover,
                   ),
                 ),
-              ),
-              Text('Cantidad disponible: ${joya.stock.toInt()}'),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Cantidad',
-                  hintText: '1',
+                const SizedBox(height: 12),
+                Text('Cantidad disponible: ${joya.stock}'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          if (cantidad > 1) setStateDialog(() => cantidad--);
+                        },
+                        icon: const Icon(Icons.remove_circle_outline)),
+                    Text('$cantidad', style: const TextStyle(fontSize: 18)),
+                    IconButton(
+                        onPressed: () {
+                          if (cantidad < joya.stock) {
+                            setStateDialog(() => cantidad++);
+                          }
+                        },
+                        icon: const Icon(Icons.add_circle_outline)),
+                  ],
                 ),
-                onChanged: (value) {
-                  int parsedValue = int.tryParse(value) ?? 1;
-                  if (parsedValue < 1) {
-                    selectedQuantity = 1;
-                  }
-                  else if(parsedValue <= joya.stock){
-                    selectedQuantity = parsedValue;
-                  }
-                  else if(parsedValue > joya.stock){
-                    selectedQuantity = parsedValue;
-                  }
-                },
-                controller: TextEditingController(text: selectedQuantity.toString()),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {   
-                Navigator.of(context).pop();       
-                if (selectedQuantity<0 || selectedQuantity > joya.stock){
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('La cantidad de productos no puede ser mayor al stock ni 0.'), backgroundColor: Colors.redAccent),
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    cartLogic.addItem(joya);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text('Agregaste $cantidad ${joya.nombre}(s) al carrito.'),
+                      ),
                     );
-                }else{
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Agregaste $selectedQuantity ${joya.nombre}(s) al carrito.')),
-                  );
-                  cartLogic.addItem(joya);
-                }
-              },
-              child: const Text('Confirmar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-          ],
-        );
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Confirmar')),
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancelar')),
+            ],
+          );
+        });
       },
     );
+  }
+
+  List<Joya> _filterAndSort(List<Joya> joyas) {
+    String query = _searchController.text.toLowerCase();
+
+    var filtered = joyas.where((joya) {
+      final matchName = joya.nombre.toLowerCase().contains(query);
+      final matchTipo =
+          _selectedTipo.toLowerCase() == 'todos' ||
+          joya.tipo.toLowerCase() == _selectedTipo.toLowerCase();
+      final matchMaterial =
+          _selectedMaterial.toLowerCase() == 'todos' ||
+          joya.material.toLowerCase() == _selectedMaterial.toLowerCase();
+      return matchName && matchTipo && matchMaterial;
+    }).toList();
+
+    switch (_sortBy) {
+      case 'Precio (menor a mayor)':
+        filtered.sort((a, b) => a.precio.compareTo(b.precio));
+        break;
+      case 'Precio (mayor a menor)':
+        filtered.sort((a, b) => b.precio.compareTo(a.precio));
+        break;
+      case 'Nombre (Z-A)':
+        filtered.sort((a, b) => b.nombre.compareTo(a.nombre));
+        break;
+      default:
+        filtered.sort((a, b) => a.nombre.compareTo(b.nombre));
+    }
+
+    return filtered.take(_visibleItems).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final joyaLogic = Provider.of<JoyaLogic>(context);
+    final joyas = joyaLogic.joyas;
 
-    if (joyaLogic.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+    final tipos = ['Todos', ...{
+    for (var j in joyas)
+      if (j.tipo.isNotEmpty) j.tipo.toUpperCase()
+    }];
+    final materiales = ['Todos', ...{
+      for (var j in joyas)
+        j.material.toUpperCase()
+    }];
+
+
+    final Map<String, String> tipoImages = {};
+    for (var tipo in tipos) {
+      if (tipo == 'Todos') continue;
+      final joyaConImagen = joyas.firstWhere(
+        (j) => j.tipo.toLowerCase() == tipo.toLowerCase() && j.imageUrl.isNotEmpty,
+        orElse: () => Joya(
+          id: '',
+          nombre: '',
+          descripcion: '',
+          precio: 0,
+          stock: 0,
+          imageUrl: '',
+          tipo: tipo,
+          material: '',
+        ),
+      );
+      tipoImages[tipo] = joyaConImagen.imageUrl.isNotEmpty
+          ? joyaConImagen.imageUrl
+          : 'https://cdn-icons-png.flaticon.com/512/565/565547.png';
     }
 
-    final joyas = joyaLogic.joyas;
-    final totalPages = (joyas.length / _itemsPerPage).ceil();
 
-    final startIndex = _currentPage * _itemsPerPage;
-    final endIndex = (startIndex + _itemsPerPage > joyas.length)
-        ? joyas.length
-        : startIndex + _itemsPerPage;
+    final joyasFiltradas = _filterAndSort(joyas);
 
-    final joyasPagina = joyas.sublist(startIndex, endIndex);
-
-    return Column(
-      children: [
-        Expanded(
-          child: GridView.builder(
-            padding: const EdgeInsets.all(10),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.75,
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: _refreshJoyas,
+        child: ListView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(8),
+          children: [
+            // Buscador
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Buscar joya por nombre...',
+                prefixIcon: const Icon(Icons.search),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+              ),
+              onChanged: (_) => setState(() {}),
             ),
-            itemCount: joyasPagina.length,
-            itemBuilder: (context, index) {
-              final joya = joyasPagina[index];
-              return _buildJoyaCard(joya);
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: _currentPage > 0
-                    ? () => setState(() => _currentPage--)
-                    : null,
-                child: const Text('Anterior'),
+            const SizedBox(height: 10),
+
+            // Categorías 
+            SizedBox(
+              height: 90,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: tipos.map((tipo) {
+                  final img = tipo == 'Todos'
+                      ? 'https://cdn-icons-png.flaticon.com/512/709/709496.png'
+                      : tipoImages[tipo] ??
+                          'https://cdn-icons-png.flaticon.com/512/565/565547.png';
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedTipo = tipo),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.all(8),
+                      width: 80,
+                      decoration: BoxDecoration(
+                        color: _selectedTipo == tipo
+                            ? Colors.blue.withOpacity(0.2)
+                            : Colors.grey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _selectedTipo == tipo
+                              ? Colors.blue
+                              : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(img,
+                                height: 40, width: 40, fit: BoxFit.cover),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(tipo,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
-              const SizedBox(width: 16),
-              Text('Página ${_currentPage + 1} de $totalPages'),
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: _currentPage < totalPages - 1
-                    ? () => setState(() => _currentPage++)
-                    : null,
-                child: const Text('Siguiente'),
+            ),
+            const SizedBox(height: 10),
+
+            //filtros
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _selectedMaterial,
+                    decoration:
+                        const InputDecoration(labelText: 'Material'),
+                    items: materiales
+                        .map((m) =>
+                            DropdownMenuItem(value: m, child: Text(m)))
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => _selectedMaterial = value!),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _sortBy,
+                    decoration: const InputDecoration(labelText: 'Ordenar por'),
+                    items: const [
+                      'Nombre (A-Z)',
+                      'Nombre (Z-A)',
+                      'Precio (menor a mayor)',
+                      'Precio (mayor a menor)',
+                    ]
+                        .map((v) =>
+                            DropdownMenuItem(value: v, child: Text(v)))
+                        .toList(),
+                    onChanged: (value) => setState(() => _sortBy = value!),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+
+            
+            GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: joyasFiltradas.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.75,
               ),
-            ],
-          ),
+              itemBuilder: (context, index) {
+                final joya = joyasFiltradas[index];
+                return _buildJoyaCard(joya);
+              },
+            ),
+
+            if (_isLoadingMore)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildJoyaCard(Joya joya) {
     return GestureDetector(
-      onTap: () {
-        // Al hacer tap, navegamos a la pantalla de detalle
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => JoyaDetailScreen(joya: joya),
-          ),
-        );
-      },
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => JoyaDetailScreen(joya: joya)),
+      ),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 4,
@@ -175,9 +358,12 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
                 child: Image.network(
-                  joya.imageUrl.isNotEmpty ? joya.imageUrl : 'https://via.placeholder.com/150',
+                  joya.imageUrl.isNotEmpty
+                      ? joya.imageUrl
+                      : 'https://via.placeholder.com/150',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -187,20 +373,24 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(joya.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
+                  Text(
+                    joya.nombre,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   Text(
                     'S/. ${joya.precio.toStringAsFixed(2)}',
-                    style: const TextStyle(color: Color.fromARGB(255, 10, 26, 252)),
+                    style: const TextStyle(color: Colors.blue),
                   ),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('${joya.stock} disponibles', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 11)),
-                      Text("  "),
-                      ElevatedButton(
-                        onPressed: () => add_shop_cart(context, joya),
-                        child: const Icon(Icons.shopping_cart),
+                      Text('${joya.stock} uds',
+                          style: const TextStyle(fontSize: 11)),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.add_shopping_cart_rounded),
+                        color: Colors.blueGrey,
+                        onPressed: () => _addShopCart(context, joya),
                       ),
                     ],
                   ),
