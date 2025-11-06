@@ -19,6 +19,8 @@ class UserLogic extends ChangeNotifier {
     notifyListeners();
   }
 
+  
+
   Future<void> fetchUsers() async {
     _setLoading(true);
     try {

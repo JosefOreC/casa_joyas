@@ -21,6 +21,10 @@
             backgroundColor: const Color.fromARGB(255, 47, 1, 214),
             foregroundColor: Colors.white,
             actions: [
+              IconButton(
+                    icon: const Icon(Icons.pin_drop),
+                    onPressed: (){return;}
+                    ),
               Stack(
                 children: [
                   IconButton(

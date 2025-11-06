@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:casa_joyas/modelo/database/crud_user.dart';
 import 'package:casa_joyas/modelo/products/user.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthLogic extends ChangeNotifier {
   final UserCRUDLogic _userRepo;
@@ -18,7 +20,8 @@ class AuthLogic extends ChangeNotifier {
     notifyListeners();
   }
 
-   Future<void> register(String email, String password, String nombre, String? numero) async {
+  
+  Future<void> register(String email, String password, String nombre, String? numero) async {
     _setLoading(true);
     try {
       final user = await _userRepo.registerUser(
@@ -35,6 +38,7 @@ class AuthLogic extends ChangeNotifier {
     }
   }
 
+ 
   Future<void> signIn(String email, String password) async {
     _setLoading(true);
     try {
@@ -46,11 +50,13 @@ class AuthLogic extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
   
   Future<void> signOut() async {
     _setLoading(true);
     try {
       await _userRepo.signOut();
+      await GoogleSignIn().signOut(); 
       _currentUser = null;
     } catch (e) {
       rethrow;
@@ -59,9 +65,40 @@ class AuthLogic extends ChangeNotifier {
     }
   }
 
+  
   Future<void> checkAuthStatus() async {
     _setLoading(true);
-    _currentUser = await _userRepo.getCurrentUser();
-    _setLoading(false);
+    try {
+      _currentUser = await _userRepo.getCurrentUser();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    _setLoading(true);
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final credential = fb.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final fb.UserCredential userCredential =
+          await fb.FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (userCredential.user == null) throw Exception("Error al iniciar sesión con Google.");
+
+      
+      final user = await _userRepo.signInWithGoogle(userCredential.user!);
+      _currentUser = user;
+    } catch (e) {
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
   }
 }
