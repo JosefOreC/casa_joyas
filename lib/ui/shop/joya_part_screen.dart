@@ -1,88 +1,234 @@
-  import 'package:flutter/material.dart';
-  import 'package:provider/provider.dart';
-  import 'package:casa_joyas/logica/auth/auth_logic.dart';
-  import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
-  import 'package:casa_joyas/ui/shop/main_screen.dart';
-  import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
-  import 'package:casa_joyas/ui/shop/catalogo_joyas_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:casa_joyas/logica/auth/auth_logic.dart';
+import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
+import 'package:casa_joyas/ui/shop/main_screen.dart';
+import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
+import 'package:casa_joyas/ui/shop/catalogo_joyas_ui.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart'; // Solo para LatLng
+import 'package:url_launcher/url_launcher.dart'; // <--- Importar url_launcher
 
-  class JoyaPartScreen extends StatelessWidget {
-    const JoyaPartScreen({super.key});
+class JoyaPartScreen extends StatefulWidget {
+  const JoyaPartScreen({super.key});
 
-    @override
-    Widget build(BuildContext context) {
-      final authLogic = Provider.of<AuthLogic>(context);
-      final cartLogic = Provider.of<ShoppingCartLogic>(context);
+  @override
+  State<JoyaPartScreen> createState() => _JoyaPartScreenState();
+}
 
-      final List<Widget> pages = [
-        Scaffold(
-          appBar: AppBar(
-            title: const Text('CASA DE LAS JOYAS'),
-            backgroundColor: const Color.fromARGB(255, 47, 1, 214),
-            foregroundColor: Colors.white,
-            actions: [
-              IconButton(
-                    icon: const Icon(Icons.pin_drop),
-                    onPressed: (){return;}
+class _JoyaPartScreenState extends State<JoyaPartScreen> {
+  // Coordenadas estáticas de la tienda
+  final LatLng _storeLocation = const LatLng(-11.950044, -75.284174);
+  String _translatedAddress = 'Cargando ubicación...';
+  
+  // URL exacta que deseas lanzar al presionar el mapa estático
+  final String _mapLaunchUrl = 'https://maps.app.goo.gl/LM81Aj7shPsdfCLY6';
+
+
+  @override
+  void initState() {
+    super.initState();
+    _translateCoordinatesToAddress(_storeLocation);
+  }
+
+  // --- LÓGICA DE GEOCODIFICACIÓN INVERSA ---
+  Future<void> _translateCoordinatesToAddress(LatLng position) async {
+    // ... (Lógica de geocodificación para obtener la dirección legible) ...
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        final address = 
+            'País: ${place.country ?? 'N/A'}\n' +
+            'Región: ${place.administrativeArea ?? 'N/A'}\n' +
+            'Ciudad: ${place.locality ?? place.subAdministrativeArea ?? 'San Jerónimo de Tunán'}\n' +
+            'Calle: ${place.street ?? 'N/A'}';
+        
+        if (mounted) {
+          setState(() {
+            _translatedAddress = address;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _translatedAddress = 'Dirección no encontrada.';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _translatedAddress = 'Error al obtener la dirección.';
+        });
+      }
+    }
+  }
+
+  // --- FUNCIÓN AGREGADA: Abrir la URL en Maps ---
+  void _launchExternalMap(BuildContext context) async {
+    final uri = Uri.parse(_mapLaunchUrl);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir el mapa. Revise la URL o la configuración.')),
+        );
+      }
+    }
+  }
+
+  // --- CUADRO DE DIÁLOGO: Contiene el mapa estático clickeable ---
+  void _showStoreLocationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('📍 ENCUÉNTRANOS AQUÍ'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                // Mapa Estático (Clickeable)
+                GestureDetector(
+                  onTap: () => _launchExternalMap(context), // <--- Redirección al link
+                  child: Container(
+                    height: 180,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue, width: 2),
+                      color: Colors.blue[50], 
+                      borderRadius: BorderRadius.circular(8),
                     ),
-              Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_cart),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ShoppingCartScreen(),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_on, 
+                          size: 50, 
+                          color: Colors.red[700],
                         ),
-                      );
-                    },
-                  ),
-                  if (cartLogic.items.isNotEmpty)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          '${cartLogic.items.length}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
+                        const Positioned(
+                          top: 8,
+                          child: Text(
+                            'TOCA PARA ABRIR EN MAPAS EXTERNOS', // Instrucción para el usuario
+                            style: TextStyle(color: Colors.black87, fontSize: 10, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
                           ),
-                          textAlign: TextAlign.center,
                         ),
-                      ),
+                        Positioned(
+                          bottom: 8,
+                          child: Text(
+                            'Lat: ${_storeLocation.latitude}, Lon: ${_storeLocation.longitude}',
+                            style: const TextStyle(color: Colors.black87, fontSize: 12),
+                          ),
+                        ),
+                      ],
                     ),
-                ],
-              ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                
+                // Dirección traducida
+                const Text(
+                  'Dirección aproximada (Geocodificada):',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  _translatedAddress,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('CERRAR'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authLogic = Provider.of<AuthLogic>(context);
+    final cartLogic = Provider.of<ShoppingCartLogic>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('CASA DE LAS JOYAS'),
+        backgroundColor: const Color.fromARGB(255, 47, 1, 214),
+        foregroundColor: Colors.white,
+        actions: [
+          // Botón Pin Drop: Abre el cuadro de diálogo
+          IconButton(
+            icon: const Icon(Icons.pin_drop),
+            onPressed: () => _showStoreLocationDialog(context), 
+          ),
+          // ... (Carrito y Logout) ...
+          Stack(
+            children: [
               IconButton(
-                icon: const Icon(Icons.exit_to_app),
-                onPressed: () async {
-                  await authLogic.signOut();
-                  Navigator.of(context).pushReplacement(
+                icon: const Icon(Icons.shopping_cart),
+                onPressed: () {
+                  Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => const MainScreen(),
+                      builder: (_) => const ShoppingCartScreen(),
                     ),
                   );
                 },
               ),
+              if (cartLogic.items.isNotEmpty)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '${cartLogic.items.length}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
             ],
           ),
-          body: const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: CatalogoJoyasScreen(),
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: () async {
+              await authLogic.signOut();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => const MainScreen(),
+                ),
+              );
+            },
           ),
-        ),
-      ];
-
-      return pages[0];
-    }
+        ],
+      ),
+      body: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: CatalogoJoyasScreen(),
+      ),
+    );
   }
+}

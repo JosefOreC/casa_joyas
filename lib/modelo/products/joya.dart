@@ -19,6 +19,28 @@ class Joya {
     required this.tipo,
   });
 
+  Joya copyWith({
+    String? id,
+    String? nombre,
+    String? descripcion,
+    double? precio,
+    int? stock, // Campo clave para el carrito
+    String? imageUrl,
+    String? tipo,
+    String? material,
+  }) {
+    return Joya(
+      id: id ?? this.id,
+      nombre: nombre ?? this.nombre,
+      descripcion: descripcion ?? this.descripcion,
+      precio: precio ?? this.precio,
+      stock: stock ?? this.stock, // El nuevo valor de stock se aplica aquí
+      imageUrl: imageUrl ?? this.imageUrl,
+      material: material ?? this.material,
+      tipo: tipo ?? this.tipo,
+    );
+  }
+
   factory Joya.fromMap(Map<String, dynamic> data, String id) {
     return Joya(
       id: id,

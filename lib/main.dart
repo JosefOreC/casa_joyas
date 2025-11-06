@@ -19,6 +19,8 @@ import 'package:casa_joyas/logica/products/user_logic.dart';
 import 'package:casa_joyas/logica/products/joya_logic.dart';
 import 'package:casa_joyas/logica/products/order_logic.dart';
 import 'package:casa_joyas/logica/products/sale_logic.dart';
+import 'package:casa_joyas/modelo/database/shopping_cart_interface.dart';
+import 'package:casa_joyas/modelo/database/firebase/shopping_cart_data.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart'; 
 
 
@@ -44,6 +46,8 @@ class MyApp extends StatelessWidget {
         Provider<JoyaCRUDLogic>(create: (_) => FirebaseJoyaCRUDLogic()),
         Provider<OrderCRUDLogic>(create: (_) => FirebaseOrderCRUDLogic()),
         Provider<SaleCRUDLogic>(create: (_) => FirebaseSaleCRUDLogic()),        
+        Provider<CartPersistenceLogic>(create: (_) => FirebaseCartPersistenceLogic()),
+
         ChangeNotifierProvider<AuthLogic>(
           create: (context) => AuthLogic(
             Provider.of<UserCRUDLogic>(context, listen: false), 
@@ -74,6 +78,9 @@ class MyApp extends StatelessWidget {
             Provider.of<OrderLogic>(context, listen: false),
             Provider.of<SaleLogic>(context, listen: false), 
             Provider.of<AuthLogic>(context, listen: false), 
+            Provider.of<CartPersistenceLogic>(context, listen: false),
+            // ARGUMENTO FALTANTE: JoyaLogic es el quinto argumento.
+            Provider.of<JoyaLogic>(context, listen: false), 
           ),
         ),
       ],

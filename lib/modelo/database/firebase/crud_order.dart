@@ -25,8 +25,21 @@ class FirebaseOrderCRUDLogic implements OrderCRUDLogic {
   @override
   Future<List<Order>> readAll() async {
     final querySnapshot = await _firestore.collection(_collectionName).get();
-    return querySnapshot.docs.map((doc) => Order.fromMap(doc.data(), doc.id)).toList();
+    return querySnapshot.docs.map((doc) => Order.fromMap(doc.data()!, doc.id)).toList();
   }
+
+  @override
+  Future<List<Order>> readByUserId(String userId) async {
+    final querySnapshot = await _firestore
+        .collection(_collectionName)
+        .where('userId', isEqualTo: userId) 
+        .orderBy('fecha', descending: true) 
+        .get();
+
+    // Asegúrate de que Order.fromMap maneje correctamente la conversión de Timestamp a DateTime
+    return querySnapshot.docs.map((doc) => Order.fromMap(doc.data()!, doc.id)).toList();
+  }
+  // -----------------------------------------------------------------
 
   @override
   Future<void> update(Order order) async {

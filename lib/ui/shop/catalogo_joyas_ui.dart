@@ -61,7 +61,7 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
     });
   }
 
-  void _addShopCart(BuildContext context, Joya joya) {
+  void _addShopCart(BuildContext context, Joya joya) async{
     final cartLogic = Provider.of<ShoppingCartLogic>(context, listen: false);
 
     if (joya.stock <= 0) {
@@ -74,7 +74,7 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
       return;
     }
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (context) {
         int cantidad = 1;
@@ -118,15 +118,29 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
             ),
             actions: [
               TextButton(
-                  onPressed: () {
-                    cartLogic.addItem(joya);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content:
-                            Text('Agregaste $cantidad ${joya.nombre}(s) al carrito.'),
-                      ),
-                    );
-                    Navigator.pop(context);
+                  onPressed: () async { // <-- Hacemos el callback ASÍNCRONO
+                    try {
+                      // CORRECCIÓN CLAVE: Pasamos la variable 'cantidad'
+                      await (cartLogic.addItem(joya, cantidad: cantidad) as Future<void>); 
+                      
+                      // Si no hubo excepción de stock:
+                      if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Agregaste $cantidad ${joya.nombre}(s) al carrito.'),
+                            ),
+                          );
+                          Navigator.pop(context);
+                      }
+                    } catch (e) {
+                      // Capturamos el error de stock lanzado por ShoppingCartLogic
+                      if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: ${e.toString().replaceAll('Exception: ', '')}')),
+                          );
+                          // No cerramos el diálogo si hay error para que el usuario pueda corregir la cantidad
+                      }
+                    }
                   },
                   child: const Text('Confirmar')),
               TextButton(

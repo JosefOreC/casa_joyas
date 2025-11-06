@@ -30,6 +30,19 @@ class JoyaLogic extends ChangeNotifier {
     }
   }
 
+  Future<Joya?> readJoya(String id) async {
+    try {
+      // El JoyaCRUDLogic debe tener un método read(String id) para esto.
+      return await _joyaRepo.read(id); 
+    } catch (e) {
+      // Registrar error, pero retornar null para no detener la aplicación
+      if (kDebugMode) {
+        print('Error al leer joya individual $id: $e');
+      }
+      return null;
+    }
+  }
+  
   Future<void> addJoya(Joya joya) async {
     _setLoading(true);
     try {

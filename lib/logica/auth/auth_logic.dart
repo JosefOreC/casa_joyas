@@ -78,27 +78,34 @@ class AuthLogic extends ChangeNotifier {
   Future<void> signInWithGoogle() async {
     _setLoading(true);
     try {
+      // 1️⃣ Inicia sesión con Google
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      if (googleUser == null) return; // Usuario canceló
 
+      // 2️⃣ Obtiene tokens de Google
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = fb.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      // 3️⃣ Inicia sesión en Firebase con la credencial de Google
       final fb.UserCredential userCredential =
           await fb.FirebaseAuth.instance.signInWithCredential(credential);
 
-      if (userCredential.user == null) throw Exception("Error al iniciar sesión con Google.");
+      final fb.User? firebaseUser = userCredential.user;
+      if (firebaseUser == null) throw Exception("Error al iniciar sesión con Google.");
 
-      
-      final user = await _userRepo.signInWithGoogle(userCredential.user!);
+      // 4️⃣ Obtiene o crea el usuario en Firestore a través del repo
+      final user = await _userRepo.signInWithGoogle(firebaseUser);
       _currentUser = user;
+
     } catch (e) {
+      debugPrint("Google Sign-In Error: $e");
       rethrow;
     } finally {
       _setLoading(false);
     }
   }
+
 }

@@ -94,28 +94,25 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
   }
 
   // --- Nuevo método para Google Sign-In ---
-  Future<User?> signInWithGoogle(fb.User firebaseUser) async {
-    if (firebaseUser.email == null) return null;
+  Future<User> signInWithGoogle(fb.User firebaseUser) async {
+    if (firebaseUser.email == null) throw Exception("El usuario no tiene email");
 
-    // Verificar si el usuario ya existe en Firestore
     final querySnapshot = await _firestore
-        .collection(_collectionName)
+        .collection('users')
         .where('email', isEqualTo: firebaseUser.email)
         .limit(1)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      // Usuario existente
       final doc = querySnapshot.docs.first;
       return User.fromMap(doc.data(), doc.id);
     } else {
-      // Crear usuario nuevo en Firestore
-      final newId = _firestore.collection(_collectionName).doc().id;
+      // Crear un nuevo usuario si no existe
       final newUser = User(
-        id: newId,
+        id: _firestore.collection('users').doc().id,
         nombre: firebaseUser.displayName ?? 'Usuario',
         email: firebaseUser.email!,
-        password: '', // no usamos password con Google
+        password: '',
         numero: null,
         rol: UserRole.cliente,
       );

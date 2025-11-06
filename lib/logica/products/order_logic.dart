@@ -7,9 +7,8 @@ class OrderLogic extends ChangeNotifier {
   List<Order> _orders = [];
   bool _isLoading = false;
 
-  OrderLogic(this._orderRepo) {
-    fetchOrders();
-  }
+  // Constructor Limpio (sin fetchOrders() automático)
+  OrderLogic(this._orderRepo);
 
   List<Order> get orders => _orders;
   bool get isLoading => _isLoading;
@@ -19,6 +18,7 @@ class OrderLogic extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Mantener fetchOrders() para la vista de administrador
   Future<void> fetchOrders() async {
     _setLoading(true);
     try {
@@ -29,13 +29,26 @@ class OrderLogic extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  // --- MÉTODO CLAVE: fetchUserOrders (CORRECCIÓN APLICADA) ---
+  Future<List<Order>> fetchUserOrders(String userId) async {
+    // ELIMINAMOS _setLoading(true/false) para evitar el bucle de reconstrucción.
+    try {
+      final userOrders = await _orderRepo.readByUserId(userId); 
+      return userOrders;
+    } catch (e) {
+      print('Error al cargar órdenes del usuario $userId: $e');
+      // Si el error es la falta de índice, la consola lo mostrará.
+      rethrow; // Relanzamos el error para que FutureBuilder pueda mostrarlo
+    }
+  }
+  // -------------------------------------------------------------
+
   Future<Order?> addOrder(Order order) async {
     try {
-      
       final newOrder = await _orderRepo.create(order);
       if (newOrder != null) {
         _orders.add(newOrder);
-        
         notifyListeners(); 
       }
       return newOrder;
@@ -51,7 +64,6 @@ class OrderLogic extends ChangeNotifier {
     } catch (e) {
       rethrow;
     } finally {
-      
       fetchOrders(); 
     }
   }

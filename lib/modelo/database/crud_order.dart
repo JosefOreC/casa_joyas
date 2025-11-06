@@ -6,4 +6,5 @@ abstract class OrderCRUDLogic {
   Future<List<Order>> readAll();
   Future<void> update(Order order);
   Future<void> delete(String id);
+  Future<List<Order>> readByUserId(String userId); 
 }

@@ -11,12 +11,21 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>(); 
   final _nombreController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _numeroController = TextEditingController();
 
+  final RegExp _emailRegExp = RegExp(
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+  );
+
   void _register() async {
+    if (!_formKey.currentState!.validate()) {
+      return; 
+    }
+
     if (!mounted) return;
     final authLogic = Provider.of<AuthLogic>(context, listen: false);
 
@@ -76,52 +85,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              controller: _nombreController,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Contraseña'),
-              obscureText: true,
-            ),
-            TextField(
-              controller: _numeroController,
-              decoration: const InputDecoration(labelText: 'Número (Opcional)'),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 20),
-            if (authLogic.isLoading)
-              const CircularProgressIndicator()
-            else ...[
-              ElevatedButton(
-                onPressed: _register,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[800],
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text('Registrarse'),
+        child: Form( 
+          key: _formKey, 
+          child: Column(
+            children: <Widget>[
+              TextFormField( 
+                controller: _nombreController,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'El nombre es obligatorio.';
+                  }
+                  return null;
+                },
               ),
-              const SizedBox(height: 10),
-              ElevatedButton.icon(
-                onPressed: _registerWithGoogle,
-                icon: const FaIcon(FontAwesomeIcons.google, color: Colors.white),
-                label: const Text('Registrarse con Google'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[700],
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
+              TextFormField( 
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'El email es obligatorio.';
+                  }
+                  if (!_emailRegExp.hasMatch(value)) {
+                    return 'Por favor, ingrese un email válido.';
+                  }
+                  return null;
+                },
               ),
+              TextFormField( 
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Contraseña'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'La contraseña es obligatoria.';
+                  }
+                  if (value.length < 6) {
+                    return 'La contraseña debe tener al menos 6 caracteres.';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _numeroController,
+                decoration: const InputDecoration(labelText: 'Número (Opcional)'),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value != null && value.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(value)) {
+                    return 'Solo se permiten números.';
+                  }
+                  return null;
+                }
+              ),
+              const SizedBox(height: 20),
+              if (authLogic.isLoading)
+                const CircularProgressIndicator()
+              else ...[
+                ElevatedButton(
+                  onPressed: _register,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[800],
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text('Registrarse'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton.icon(
+                  onPressed: _registerWithGoogle,
+                  icon: const FaIcon(FontAwesomeIcons.google, color: Colors.white),
+                  label: const Text('Registrarse con Google'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red[700],
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -23,7 +23,7 @@ class _ClientHomeState extends State<ClientHome> {
     
     final List<Widget> pages = [
       JoyaPartScreen(),   
-      PedidosScreen(authLogic: authLogic),   
+      PedidosScreen(),   
       PerfilScreen(authLogic: authLogic), 
     ];
 
