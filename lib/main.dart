@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/firebase_options.dart';
-import 'package:casa_joyas/ui/shop/main_screen.dart'; 
+import 'package:casa_joyas/ui/shop/client_home.dart'; 
 
 import 'package:casa_joyas/modelo/database/crud_user.dart';
 import 'package:casa_joyas/modelo/database/crud_joya.dart';
@@ -90,7 +90,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.deepPurple,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: MainScreen(), 
+        home: ClientHome(), 
       ),
     );
   }

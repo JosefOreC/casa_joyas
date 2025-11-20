@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:casa_joyas/ui/shop/main_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -38,11 +39,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (authLogic.isAuthenticated && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registro exitoso. ¡Bienvenido Cliente!')),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
-        Navigator.of(context).pop();
       }
+
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -60,11 +62,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await authLogic.signInWithGoogle();
 
       if (authLogic.isAuthenticated && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registro/Inicio con Google exitoso. ¡Bienvenido!')),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
-        Navigator.of(context).pop();
       }
+
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

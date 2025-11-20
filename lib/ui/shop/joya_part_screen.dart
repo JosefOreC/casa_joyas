@@ -6,8 +6,9 @@ import 'package:casa_joyas/ui/shop/main_screen.dart';
 import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
 import 'package:casa_joyas/ui/shop/catalogo_joyas_ui.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // Solo para LatLng
-import 'package:url_launcher/url_launcher.dart'; // <--- Importar url_launcher
+import 'package:google_maps_flutter/google_maps_flutter.dart'; 
+import 'package:url_launcher/url_launcher.dart';
+import 'package:casa_joyas/ui/auth/login.dart';
 
 class JoyaPartScreen extends StatefulWidget {
   const JoyaPartScreen({super.key});
@@ -33,7 +34,6 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
 
   // --- LÓGICA DE GEOCODIFICACIÓN INVERSA ---
   Future<void> _translateCoordinatesToAddress(LatLng position) async {
-    // ... (Lógica de geocodificación para obtener la dirección legible) ...
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
@@ -172,8 +172,8 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
           IconButton(
             icon: const Icon(Icons.pin_drop),
             onPressed: () => _showStoreLocationDialog(context), 
-          ),
-          // ... (Carrito y Logout) ...
+          ), 
+          
           Stack(
             children: [
               IconButton(
@@ -186,6 +186,7 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
                   );
                 },
               ),
+
               if (cartLogic.items.isNotEmpty)
                 Positioned(
                   right: 8,
@@ -213,16 +214,28 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () async {
-              await authLogic.signOut();
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => const MainScreen(),
+                icon: Icon(
+                  authLogic.isAuthenticated
+                      ? Icons.logout
+                      : Icons.login,
                 ),
-              );
-            },
-          ),
+                onPressed: () async {
+                  if (authLogic.isAuthenticated) {
+                    // Cerrar sesión
+                    await authLogic.signOut();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Sesión cerrada")),
+                    );
+                    setState(() {}); 
+                  } else {
+                    // Ir a pantalla de login
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  }
+                },
+              ),
         ],
       ),
       body: const Padding(

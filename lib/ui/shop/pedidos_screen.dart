@@ -6,7 +6,7 @@ import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 import 'package:casa_joyas/modelo/products/order.dart'; // NECESARIO
 import 'package:casa_joyas/ui/shop/main_screen.dart';
 import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
-
+import 'package:casa_joyas/ui/auth/login.dart';
 
 class PedidosScreen extends StatelessWidget {
   // Eliminamos la dependencia directa de AuthLogic en el constructor y la obtenemos por Provider.
@@ -85,14 +85,26 @@ class PedidosScreen extends StatelessWidget {
                 ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () async {
-              await authLogic.signOut();
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => const MainScreen(),
+          Consumer<AuthLogic>(
+            builder: (context, authLogic, child) {
+              return IconButton(
+                icon: Icon(
+                  authLogic.isAuthenticated ? Icons.logout : Icons.login,
                 ),
+                onPressed: () async {
+                  if (authLogic.isAuthenticated) {
+                    await authLogic.signOut();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Sesión cerrada")),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  }
+                },
               );
             },
           ),

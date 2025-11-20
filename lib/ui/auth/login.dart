@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:casa_joyas/ui/auth/register.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:casa_joyas/ui/shop/main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,10 +34,12 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await authLogic.signIn(email, password);
       if (authLogic.isAuthenticated && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Inicio de sesión exitoso. ¡Bienvenido!')),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       }
+
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -52,8 +55,9 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await authLogic.signInWithGoogle();
       if (authLogic.isAuthenticated && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Inicio de sesión con Google exitoso. ¡Bienvenido!')),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       }
     } catch (e) {
@@ -165,7 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Registro
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

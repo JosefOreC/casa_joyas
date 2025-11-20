@@ -9,6 +9,10 @@ abstract class UserCRUDLogic {
   Future<void> delete(String id);
   Future<void> signOut();
   Future<User?> getCurrentUser();
+  Future<bool> existsEmail(String email);
+  Future<bool> existsNumero(String numero);
+  Future<User?> getUserById(String uid);
+
   Future<User?> registerUser({
     required String email,
     required String password,
@@ -20,6 +24,5 @@ abstract class UserCRUDLogic {
     required String password,
   });
 
-  // <<< Aquí se agrega
   Future<User?> signInWithGoogle(fb.User firebaseUser);
 }
