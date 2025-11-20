@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'; 
-import 'package:geocoding/geocoding.dart'; 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -17,23 +16,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _addressController = TextEditingController(text: 'Av. Principal 123');
   final _phoneController = TextEditingController();
   String _paymentMethod = 'Tarjeta de Crédito';
-  
-  
+
   LatLng _deliveryLocation = const LatLng(-12.0433, -77.0283);
-  String _currentLocationMessage = 'Ubicación actual: No determinada'; 
-  String _translatedAddress = 'Esperando coordenadas...'; 
+  String _currentLocationMessage = 'Ubicación actual: No determinada';
+  String _translatedAddress = 'Esperando coordenadas...';
 
-  final List<String> _paymentOptions = ['Tarjeta de Crédito', 'Transferencia Bancaria', 'Pago contra Entrega'];
-
+  final List<String> _paymentOptions = [
+    'Tarjeta de Crédito',
+    'Transferencia Bancaria',
+    'Pago contra Entrega',
+  ];
 
   @override
   void initState() {
     super.initState();
-    
+
     _translateCoordinatesToAddress(_deliveryLocation);
   }
 
-  
   Future<void> _translateCoordinatesToAddress(LatLng position) async {
     setState(() {
       _translatedAddress = 'Traduciendo...';
@@ -48,7 +48,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
         setState(() {
-          _translatedAddress = 
+          _translatedAddress =
               'País: ${place.country ?? 'N/A'}\n' +
               'Región: ${place.administrativeArea ?? 'N/A'}\n' +
               'Ciudad: ${place.locality ?? place.subAdministrativeArea ?? 'N/A'}\n' +
@@ -56,25 +56,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         });
         // Opcional: Rellenar la dirección de referencia
         if (place.street != null && place.locality != null) {
-             _addressController.text = '${place.street!}, ${place.locality!}';
+          _addressController.text = '${place.street!}, ${place.locality!}';
         }
       } else {
         setState(() {
-          _translatedAddress = 'No se encontró dirección para estas coordenadas.';
+          _translatedAddress =
+              'No se encontró dirección para estas coordenadas.';
         });
       }
     } catch (e) {
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('Error de geocodificación: $e')),
-         );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error de geocodificación: $e')));
       }
       setState(() {
-        _translatedAddress = 'Error al conectar con el servicio de geocodificación.';
+        _translatedAddress =
+            'Error al conectar con el servicio de geocodificación.';
       });
     }
   }
-
 
   // --- LÓGICA DE GEOLOCALIZACIÓN REAL (geolocator) ---
   Future<void> _getCurrentLocation() async {
@@ -89,7 +90,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       setState(() {
-        _currentLocationMessage = 'ERROR: Servicios de ubicación deshabilitados.';
+        _currentLocationMessage =
+            'ERROR: Servicios de ubicación deshabilitados.';
       });
       await Geolocator.openLocationSettings();
       return;
@@ -99,7 +101,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
         setState(() {
           _currentLocationMessage = 'ERROR: Permiso de ubicación denegado.';
         });
@@ -110,11 +113,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // 3. Obtener la posición actual
     try {
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high
+        desiredAccuracy: LocationAccuracy.high,
       );
 
       final LatLng newLocation = LatLng(position.latitude, position.longitude);
-      
+
       setState(() {
         _deliveryLocation = newLocation;
         _currentLocationMessage = 'Ubicación obtenida con precisión.';
@@ -122,47 +125,51 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       // 4. Traducir y actualizar la dirección
       await _translateCoordinatesToAddress(newLocation);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Ubicación obtenida con éxito.')),
         );
       }
-
     } catch (e) {
       setState(() {
         _currentLocationMessage = 'ERROR al obtener la posición: $e';
       });
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('Error: ${e.toString()}')),
-         );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     }
   }
 
   void _confirmOrder() async {
     final cartLogic = Provider.of<ShoppingCartLogic>(context, listen: false);
-    
+
     if (_addressController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, ingrese una dirección de entrega.')),
+        const SnackBar(
+          content: Text('Por favor, ingrese una dirección de entrega.'),
+        ),
       );
       return;
     }
-    
+
     try {
       final order = await cartLogic.placeOrder();
-      
+
       if (order != null && mounted) {
-        Navigator.of(context).popUntil((route) => route.isFirst); 
+        Navigator.of(context).popUntil((route) => route.isFirst);
         _showOrderSuccess(context, order.id);
       }
     } catch (e) {
       if (mounted) {
         String errorMessage = e.toString().replaceAll('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al procesar el pedido: $errorMessage'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error al procesar el pedido: $errorMessage'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -171,7 +178,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _showOrderSuccess(BuildContext context, String orderId) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('¡Pedido finalizado con éxito! ID: ${orderId.substring(0, 8)}...'),
+        content: Text(
+          '¡Pedido finalizado con éxito! ID: ${orderId.substring(0, 8)}...',
+        ),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 5),
       ),
@@ -193,15 +202,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
-            Text('🚚 Detalles de la Entrega', style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              '🚚 Detalles de la Entrega',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const Divider(),
 
             Container(
-              height: 250, 
+              height: 250,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
-                color: Colors.grey[200], 
+                color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Center(
@@ -212,7 +223,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     SizedBox(height: 10),
                     Text(
                       'MAPA (Próximamente)',
-                      style: TextStyle(color: Colors.blueGrey, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.blueGrey,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       '',
@@ -228,11 +242,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               style: const TextStyle(fontSize: 12, color: Colors.blueGrey),
             ),
             const SizedBox(height: 10),
-            
+
             // Mostrar la Dirección Traducida
             Text(
               'Dirección:',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 5),
             Container(
@@ -268,21 +284,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               style: const TextStyle(fontSize: 12, color: Colors.red),
             ),
             const SizedBox(height: 20),
-            
+
             TextField(
               controller: _addressController,
-              decoration: const InputDecoration(labelText: 'Dirección de Referencia (Avenida/Calle)'),
+              decoration: const InputDecoration(
+                labelText: 'Dirección de Referencia (Avenida/Calle)',
+              ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _phoneController,
-              decoration: const InputDecoration(labelText: 'Teléfono de Contacto'),
+              decoration: const InputDecoration(
+                labelText: 'Teléfono de Contacto',
+              ),
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 30),
 
             // --- Sección de Pago ---
-            Text('💳 Método de Pago', style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              '💳 Método de Pago',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const Divider(),
 
             Column(
@@ -307,10 +330,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('TOTAL:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  'TOTAL:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 Text(
                   'S/. ${cartLogic.total.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
                 ),
               ],
             ),
@@ -320,10 +350,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: cartLogic.isProcessingOrder ? null : _confirmOrder,
-                icon: cartLogic.isProcessingOrder 
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                icon: cartLogic.isProcessingOrder
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : const Icon(Icons.check_circle_outline),
-                label: Text(cartLogic.isProcessingOrder ? 'Procesando...' : 'CONFIRMAR Y PAGAR'),
+                label: Text(
+                  cartLogic.isProcessingOrder
+                      ? 'Procesando...'
+                      : 'CONFIRMAR Y PAGAR',
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 36, 15, 230),
                   foregroundColor: Colors.white,

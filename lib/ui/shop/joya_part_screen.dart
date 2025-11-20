@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
+import 'package:casa_joyas/logica/products/notification_logic.dart';
 import 'package:casa_joyas/ui/shop/main_screen.dart';
 import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
 import 'package:casa_joyas/ui/shop/catalogo_joyas_ui.dart';
+import 'package:casa_joyas/ui/notifications/notifications_screen.dart';
+import 'package:casa_joyas/ui/widgets/notification_badge.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'; 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:casa_joyas/ui/auth/login.dart';
 
@@ -21,10 +24,9 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
   // Coordenadas estáticas de la tienda
   final LatLng _storeLocation = const LatLng(-11.950044, -75.284174);
   String _translatedAddress = 'Cargando ubicación...';
-  
+
   // URL exacta que deseas lanzar al presionar el mapa estático
   final String _mapLaunchUrl = 'https://maps.app.goo.gl/LM81Aj7shPsdfCLY6';
-
 
   @override
   void initState() {
@@ -42,12 +44,12 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
 
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
-        final address = 
+        final address =
             'País: ${place.country ?? 'N/A'}\n' +
             'Región: ${place.administrativeArea ?? 'N/A'}\n' +
             'Ciudad: ${place.locality ?? place.subAdministrativeArea ?? 'San Jerónimo de Tunán'}\n' +
             'Calle: ${place.street ?? 'N/A'}';
-        
+
         if (mounted) {
           setState(() {
             _translatedAddress = address;
@@ -78,7 +80,11 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir el mapa. Revise la URL o la configuración.')),
+          const SnackBar(
+            content: Text(
+              'No se pudo abrir el mapa. Revise la URL o la configuración.',
+            ),
+          ),
         );
       }
     }
@@ -96,34 +102,43 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
               children: <Widget>[
                 // Mapa Estático (Clickeable)
                 GestureDetector(
-                  onTap: () => _launchExternalMap(context), // <--- Redirección al link
+                  onTap: () =>
+                      _launchExternalMap(context), // <--- Redirección al link
                   child: Container(
                     height: 180,
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.blue, width: 2),
-                      color: Colors.blue[50], 
+                      color: Colors.blue[50],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         Icon(
-                          Icons.location_on, 
-                          size: 50, 
+                          Icons.location_on,
+                          size: 50,
                           color: Colors.red[700],
                         ),
                         const Positioned(
                           top: 8,
                           child: Text(
                             'TOCA PARA ABRIR EN MAPAS EXTERNOS', // Instrucción para el usuario
-                            style: TextStyle(color: Colors.black87, fontSize: 10, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 10,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         Positioned(
                           bottom: 8,
                           child: Text(
                             'Lat: ${_storeLocation.latitude}, Lon: ${_storeLocation.longitude}',
-                            style: const TextStyle(color: Colors.black87, fontSize: 12),
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ],
@@ -131,16 +146,13 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                
+
                 // Dirección traducida
                 const Text(
-                  'Dirección aproximada (Geocodificada):',
+                  'Dirección aproximada:',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text(
-                  _translatedAddress,
-                  style: const TextStyle(fontSize: 14),
-                ),
+                Text(_translatedAddress, style: const TextStyle(fontSize: 14)),
               ],
             ),
           ),
@@ -161,84 +173,93 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
   Widget build(BuildContext context) {
     final authLogic = Provider.of<AuthLogic>(context);
     final cartLogic = Provider.of<ShoppingCartLogic>(context);
+    final notificationLogic = Provider.of<NotificationLogic>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('CASA DE LAS JOYAS'),
         backgroundColor: const Color.fromARGB(255, 47, 1, 214),
-        titleTextStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        titleTextStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
         actions: [
           // Botón Pin Drop: Abre el cuadro de diálogo
           IconButton(
             icon: const Icon(Icons.pin_drop),
             color: Colors.white,
-            onPressed: () => _showStoreLocationDialog(context), 
-          ), 
-          
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                color: Colors.white,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ShoppingCartScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              if (cartLogic.items.isNotEmpty)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '${cartLogic.items.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
+            onPressed: () => _showStoreLocationDialog(context),
           ),
+
+          // Ícono de notificaciones con badge
+          NotificationBadge(
+            count: notificationLogic.unreadCount,
+            top: 8,
+            right: 8,
+            child: IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              color: Colors.white,
+              onPressed: () {
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsScreen(),
+                      ),
+                    )
+                    .then((_) {
+                      // Recargar contador al volver
+                      if (authLogic.currentUser != null) {
+                        notificationLogic.fetchUnreadNotifications(
+                          authLogic.currentUser!.id,
+                        );
+                      }
+                    });
+              },
+              tooltip: 'Notificaciones',
+            ),
+          ),
+
+          // Carrito de compras con badge
+          NotificationBadge(
+            count: cartLogic.items.length,
+            top: 8,
+            right: 8,
+            child: IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              color: Colors.white,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ShoppingCartScreen()),
+                );
+              },
+              tooltip: 'Carrito',
+            ),
+          ),
+
+          // Botón de login/logout
           IconButton(
-                icon: Icon(
-                  authLogic.isAuthenticated
-                      ? Icons.logout
-                      : Icons.login,
-                ),
-                color: Colors.white,
-                onPressed: () async {
-                  if (authLogic.isAuthenticated) {
-                    // Cerrar sesión
-                    await authLogic.signOut();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Sesión cerrada")),
-                    );
-                    setState(() {}); 
-                  } else {
-                    // Ir a pantalla de login
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    );
-                  }
-                },
-              ),
+            icon: Icon(authLogic.isAuthenticated ? Icons.logout : Icons.login),
+            color: Colors.white,
+            onPressed: () async {
+              if (authLogic.isAuthenticated) {
+                // Cerrar sesión
+                await authLogic.signOut();
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text("Sesión cerrada")));
+                setState(() {});
+              } else {
+                // Ir a pantalla de login
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              }
+            },
+            tooltip: authLogic.isAuthenticated
+                ? 'Cerrar sesión'
+                : 'Iniciar sesión',
+          ),
         ],
       ),
       body: const Padding(

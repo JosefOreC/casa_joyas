@@ -240,12 +240,15 @@ class _OrderCRUDScreenState extends State<OrderCRUDScreen> {
                   final orderActualizada = order.copyWith(
                     estado: estadoSeleccionado,
                   );
-                  await orderLogic.updateOrder(orderActualizada);
+                  await orderLogic.updateOrder(
+                    orderActualizada,
+                    previousOrder: order,
+                  );
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'Estado actualizado a: $estadoSeleccionado',
+                        'Estado actualizado a: $estadoSeleccionado. Notificación enviada al cliente.',
                       ),
                       backgroundColor: Colors.green,
                     ),

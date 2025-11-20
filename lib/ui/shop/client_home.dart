@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
+import 'package:casa_joyas/logica/products/notification_logic.dart';
 import 'package:casa_joyas/ui/shop/joya_part_screen.dart';
 import 'package:casa_joyas/ui/shop/pedidos_screen.dart';
 import 'package:casa_joyas/ui/user/perfil_screen.dart';
@@ -16,15 +17,28 @@ class _ClientHomeState extends State<ClientHome> {
   int _selectedIndex = 0;
 
   @override
-  Widget build(BuildContext context) {
-    
-    final authLogic = Provider.of<AuthLogic>(context);
+  void initState() {
+    super.initState();
+    // Cargar notificaciones no leídas al iniciar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authLogic = Provider.of<AuthLogic>(context, listen: false);
+      final notificationLogic = Provider.of<NotificationLogic>(
+        context,
+        listen: false,
+      );
 
-    
+      if (authLogic.currentUser != null) {
+        notificationLogic.fetchUnreadNotifications(authLogic.currentUser!.id);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final List<Widget> pages = [
-      JoyaPartScreen(),   
-      PedidosScreen(),   
-      PerfilScreen(), 
+      const JoyaPartScreen(),
+      const PedidosScreen(),
+      const PerfilScreen(),
     ];
 
     return Scaffold(
