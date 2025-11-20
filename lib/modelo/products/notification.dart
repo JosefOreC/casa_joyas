@@ -10,7 +10,7 @@ class AppNotification {
   final NotificationType type;
   final DateTime createdAt;
   final bool isRead;
-  final Map<String, dynamic>? metadata; // Para datos adicionales como orderId
+  final Map<String, dynamic>? metadata;
 
   AppNotification({
     required this.id,
