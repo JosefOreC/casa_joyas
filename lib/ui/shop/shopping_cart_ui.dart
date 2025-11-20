@@ -92,11 +92,25 @@ class ShoppingCartScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final item = cartLogic.items[index];
                       
-                      // 🚨 SOLUCIÓN: Llama al stock conocido sin FutureBuilder
-                      final stockAvailable = cartLogic.getStockForItem(item.joyaId);
-                      final inStock = item.cantidad <= stockAvailable;
-                      
-                      return _buildCartItem(context, cartLogic, item, inStock);
+                      // 🔧 FIX: Cargar el stock para cada item antes de mostrarlo
+                      return FutureBuilder<bool>(
+                        future: cartLogic.isItemInStock(item),
+                        builder: (context, snapshot) {
+                          // Mientras carga, mostrar el item con estado de carga
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            final stockAvailable = cartLogic.getStockForItem(item.joyaId);
+                            // Si no hay stock cargado aún, asumimos que está en stock hasta que se verifique
+                            final inStock = stockAvailable == 0 ? true : item.cantidad <= stockAvailable;
+                            return _buildCartItem(context, cartLogic, item, inStock);
+                          }
+                          
+                          // Una vez cargado, usar el stock actualizado
+                          final stockAvailable = cartLogic.getStockForItem(item.joyaId);
+                          final inStock = item.cantidad <= stockAvailable;
+                          
+                          return _buildCartItem(context, cartLogic, item, inStock);
+                        },
+                      );
                     },
                   ),
                 ),

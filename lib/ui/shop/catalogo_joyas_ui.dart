@@ -394,7 +394,7 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
                   ),
                   Text(
                     'S/. ${joya.precio.toStringAsFixed(2)}',
-                    style: const TextStyle(color: Colors.blue),
+                    style: const TextStyle(color: Color.fromARGB(255, 0, 31, 186), fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Row(
                     children: [
@@ -403,7 +403,7 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.add_shopping_cart_rounded),
-                        color: Colors.blueGrey,
+                        color: Colors.yellow[800],
                         onPressed: () => _addShopCart(context, joya),
                       ),
                     ],

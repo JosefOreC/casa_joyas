@@ -166,11 +166,12 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
       appBar: AppBar(
         title: const Text('CASA DE LAS JOYAS'),
         backgroundColor: const Color.fromARGB(255, 47, 1, 214),
-        foregroundColor: Colors.white,
+        titleTextStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         actions: [
           // Botón Pin Drop: Abre el cuadro de diálogo
           IconButton(
             icon: const Icon(Icons.pin_drop),
+            color: Colors.white,
             onPressed: () => _showStoreLocationDialog(context), 
           ), 
           
@@ -178,6 +179,7 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
+                color: Colors.white,
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -219,6 +221,7 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
                       ? Icons.logout
                       : Icons.login,
                 ),
+                color: Colors.white,
                 onPressed: () async {
                   if (authLogic.isAuthenticated) {
                     // Cerrar sesión

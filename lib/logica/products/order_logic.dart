@@ -30,11 +30,26 @@ class OrderLogic extends ChangeNotifier {
     }
   }
 
+  // Nuevo método para obtener órdenes por rango de fechas
+  Future<void> fetchOrdersByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    _setLoading(true);
+    try {
+      _orders = await _orderRepo.readByDateRange(startDate, endDate);
+    } catch (e) {
+      print('Error al cargar órdenes por fecha: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // --- MÉTODO CLAVE: fetchUserOrders (CORRECCIÓN APLICADA) ---
   Future<List<Order>> fetchUserOrders(String userId) async {
     // ELIMINAMOS _setLoading(true/false) para evitar el bucle de reconstrucción.
     try {
-      final userOrders = await _orderRepo.readByUserId(userId); 
+      final userOrders = await _orderRepo.readByUserId(userId);
       return userOrders;
     } catch (e) {
       print('Error al cargar órdenes del usuario $userId: $e');
@@ -49,7 +64,7 @@ class OrderLogic extends ChangeNotifier {
       final newOrder = await _orderRepo.create(order);
       if (newOrder != null) {
         _orders.add(newOrder);
-        notifyListeners(); 
+        notifyListeners();
       }
       return newOrder;
     } catch (e) {
@@ -64,7 +79,7 @@ class OrderLogic extends ChangeNotifier {
     } catch (e) {
       rethrow;
     } finally {
-      fetchOrders(); 
+      fetchOrders();
     }
   }
 }
