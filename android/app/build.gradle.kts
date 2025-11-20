@@ -54,9 +54,6 @@ android {
             // so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
             signingConfig = signingConfigs.getByName("release")
-            ndk {
-                debugSymbolLevel = "FULL"
-            }
         }
     }
 
@@ -64,7 +61,6 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
-        doNotStrip("**/*.so")
     }
 }
 
