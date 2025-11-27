@@ -7,20 +7,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:515728386769:android:048aa8ac054dda5679b3f0",
+        "mobilesdk_app_id": "1:515728386769:android:5875e7eae6b584e679b3f0",
         "android_client_info": {
           "package_name": "com.example.casa_joyas"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "515728386769-7u5i12b3nc9r087mefpcogo5cqo3mg7i.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.casa_joyas",
-            "certificate_hash": "80c0d97768ee31e79f5fd4402a4234f1d461a8d7"
-          }
-        },
         {
           "client_id": "515728386769-1edm0j8db5dnorib8dhmlt53f85bkh4c.apps.googleusercontent.com",
           "client_type": 3
