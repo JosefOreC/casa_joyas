@@ -42,17 +42,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDwkWddfY-Dl71L8WK-RHnZozEOcfUDw-I',
-    appId: '1:515728386769:web:ccb180544b4ce57279b3f0',
+    appId: '1:515728386769:web:958aa6d9cbdbcbe479b3f0',
     messagingSenderId: '515728386769',
     projectId: 'casajoyasf',
     authDomain: 'casajoyasf.firebaseapp.com',
     storageBucket: 'casajoyasf.firebasestorage.app',
-    measurementId: 'G-983X4F8HFS',
+    measurementId: 'G-SLSTRZ073L',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAmSKGy1ElqSEBziF1jxlymPxORal7cjZ8',
-    appId: '1:515728386769:android:048aa8ac054dda5679b3f0',
+    appId: '1:515728386769:android:5875e7eae6b584e679b3f0',
     messagingSenderId: '515728386769',
     projectId: 'casajoyasf',
     storageBucket: 'casajoyasf.firebasestorage.app',
@@ -60,30 +60,34 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAmcSC7ik9hdwZWensc6oWy3xJWPamFSNU',
-    appId: '1:515728386769:ios:6309e9e453e0d26d79b3f0',
+    appId: '1:515728386769:ios:0d1e59ff17f5b2e279b3f0',
     messagingSenderId: '515728386769',
     projectId: 'casajoyasf',
     storageBucket: 'casajoyasf.firebasestorage.app',
+    androidClientId: '515728386769-0eg8rk8odmnvfehcduh4khs8std64tst.apps.googleusercontent.com',
+    iosClientId: '515728386769-g01377pqd2qoseav4gvopv0s7n3tcb8b.apps.googleusercontent.com',
     iosBundleId: 'com.example.casaJoyas',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAmcSC7ik9hdwZWensc6oWy3xJWPamFSNU',
-    appId: '1:515728386769:ios:6309e9e453e0d26d79b3f0',
+    appId: '1:515728386769:ios:0d1e59ff17f5b2e279b3f0',
     messagingSenderId: '515728386769',
     projectId: 'casajoyasf',
     storageBucket: 'casajoyasf.firebasestorage.app',
+    androidClientId: '515728386769-0eg8rk8odmnvfehcduh4khs8std64tst.apps.googleusercontent.com',
+    iosClientId: '515728386769-g01377pqd2qoseav4gvopv0s7n3tcb8b.apps.googleusercontent.com',
     iosBundleId: 'com.example.casaJoyas',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyDwkWddfY-Dl71L8WK-RHnZozEOcfUDw-I',
-    appId: '1:515728386769:web:551afe1cb1225a6c79b3f0',
+    appId: '1:515728386769:web:0dea11f04ccd9c7f79b3f0',
     messagingSenderId: '515728386769',
     projectId: 'casajoyasf',
     authDomain: 'casajoyasf.firebaseapp.com',
     storageBucket: 'casajoyasf.firebasestorage.app',
-    measurementId: 'G-2P7C3PTRKL',
+    measurementId: 'G-785PDMJ70X',
   );
 
 }

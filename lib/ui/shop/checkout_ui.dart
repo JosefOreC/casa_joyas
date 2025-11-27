@@ -21,6 +21,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _currentLocationMessage = 'Ubicación actual: No determinada';
   String _translatedAddress = 'Esperando coordenadas...';
 
+  // Nuevas variables para el mapa interactivo
+  String _deliveryType = 'delivery'; // 'delivery' o 'store_pickup'
+  final LatLng _storeLocation = const LatLng(-11.950044, -75.284174);
+  GoogleMapController? _mapController;
+
   final List<String> _paymentOptions = [
     'Tarjeta de Crédito',
     'Transferencia Bancaria',
@@ -47,21 +52,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
+
+        // Formato para mostrar en el Container
+        final displayAddress =
+            'País: ${place.country ?? 'N/A'}\n'
+            'Región: ${place.administrativeArea ?? 'N/A'}\n'
+            'Ciudad: ${place.locality ?? place.subAdministrativeArea ?? 'N/A'}\n'
+            'Calle: ${place.street ?? 'N/A'}';
+
+        // Formato compacto para el TextField
+        final compactAddress = '${place.street ?? ''}, ${place.locality ?? ''}';
+
         setState(() {
-          _translatedAddress =
-              'País: ${place.country ?? 'N/A'}\n' +
-              'Región: ${place.administrativeArea ?? 'N/A'}\n' +
-              'Ciudad: ${place.locality ?? place.subAdministrativeArea ?? 'N/A'}\n' +
-              'Calle: ${place.street ?? 'N/A'}';
+          _translatedAddress = displayAddress;
+          _addressController.text = compactAddress.trim();
         });
-        // Opcional: Rellenar la dirección de referencia
-        if (place.street != null && place.locality != null) {
-          _addressController.text = '${place.street!}, ${place.locality!}';
-        }
       } else {
         setState(() {
-          _translatedAddress =
-              'No se encontró dirección para estas coordenadas.';
+          _translatedAddress = 'No se encontró dirección para estas coordenadas.';
+          _addressController.text = 'Dirección no disponible';
         });
       }
     } catch (e) {
@@ -79,6 +88,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   // --- LÓGICA DE GEOLOCALIZACIÓN REAL (geolocator) ---
   Future<void> _getCurrentLocation() async {
+    // Validar que esté en modo delivery
+    if (_deliveryType == 'store_pickup') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('En modo "Recojo en Tienda" no se requiere ubicación'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _currentLocationMessage = 'Solicitando ubicación...';
     });
@@ -123,6 +143,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _currentLocationMessage = 'Ubicación obtenida con precisión.';
       });
 
+      // Animar la cámara del mapa a la nueva ubicación
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(newLocation, 16),
+      );
+
       // 4. Traducir y actualizar la dirección
       await _translateCoordinatesToAddress(newLocation);
 
@@ -143,19 +168,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
+  // --- FUNCIÓN: Callback cuando se arrastra el marcador ---
+  Future<void> _onMarkerDragged(LatLng newPosition) async {
+    setState(() {
+      _deliveryLocation = newPosition;
+    });
+
+    // Actualizar la dirección con geocoding inverso
+    await _translateCoordinatesToAddress(newPosition);
+  }
+
   void _confirmOrder() async {
     final cartLogic = Provider.of<ShoppingCartLogic>(context, listen: false);
 
-    if (_addressController.text.isEmpty) {
+    // Validación mejorada según tipo de entrega
+    if (_deliveryType == 'delivery' && _addressController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor, ingrese una dirección de entrega.'),
+          content: Text('Por favor, seleccione una ubicación de entrega en el mapa.'),
+        ),
+      );
+      return;
+    }
+
+    if (_phoneController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, ingrese un teléfono de contacto.'),
         ),
       );
       return;
     }
 
     try {
+      // Aquí puedes agregar lógica para guardar:
+      // - _deliveryType (tipo de entrega: 'delivery' o 'store_pickup')
+      // - _deliveryLocation (coordenadas LatLng)
+      // - _addressController.text (dirección formateada)
+
       final order = await cartLogic.placeOrder();
 
       if (order != null && mounted) {
@@ -208,31 +258,74 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const Divider(),
 
+            // Selector de Tipo de Entrega
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(
+                  value: 'delivery',
+                  label: Text('Delivery'),
+                  icon: Icon(Icons.local_shipping),
+                ),
+                ButtonSegment(
+                  value: 'store_pickup',
+                  label: Text('Recojo en Tienda'),
+                  icon: Icon(Icons.store),
+                ),
+              ],
+              selected: {_deliveryType},
+              onSelectionChanged: (Set<String> newSelection) {
+                setState(() {
+                  _deliveryType = newSelection.first;
+                  if (_deliveryType == 'store_pickup') {
+                    // Cambiar a ubicación de tienda
+                    _deliveryLocation = _storeLocation;
+                    _translateCoordinatesToAddress(_storeLocation);
+                    // Centrar mapa en la tienda
+                    _mapController?.animateCamera(
+                      CameraUpdate.newLatLngZoom(_storeLocation, 16),
+                    );
+                  }
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+
             Container(
               height: 250,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
-                color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.map, size: 50, color: Colors.blueGrey),
-                    SizedBox(height: 10),
-                    Text(
-                      'MAPA (Próximamente)',
-                      style: TextStyle(
-                        color: Colors.blueGrey,
-                        fontWeight: FontWeight.bold,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: GoogleMap(
+                  onMapCreated: (GoogleMapController controller) {
+                    _mapController = controller;
+                  },
+                  initialCameraPosition: CameraPosition(
+                    target: _deliveryLocation,
+                    zoom: 15,
+                  ),
+                  markers: {
+                    Marker(
+                      markerId: const MarkerId('delivery_location'),
+                      position: _deliveryLocation,
+                      draggable: _deliveryType == 'delivery',
+                      onDragEnd: _deliveryType == 'delivery' ? _onMarkerDragged : null,
+                      icon: _deliveryType == 'store_pickup'
+                          ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)
+                          : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+                      infoWindow: InfoWindow(
+                        title: _deliveryType == 'store_pickup'
+                            ? 'Casa de las Joyas'
+                            : 'Ubicación de entrega',
                       ),
                     ),
-                    Text(
-                      '',
-                      style: TextStyle(color: Colors.blueGrey, fontSize: 12),
-                    ),
-                  ],
+                  },
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
                 ),
               ),
             ),
@@ -269,11 +362,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _getCurrentLocation, // Llama a la ubicación real
+                onPressed: _deliveryType == 'delivery' ? _getCurrentLocation : null,
                 icon: const Icon(Icons.my_location),
                 label: const Text('Usar Ubicación Actual'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: _deliveryType == 'delivery' ? Colors.orange : Colors.grey,
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -288,8 +381,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             TextField(
               controller: _addressController,
               decoration: const InputDecoration(
-                labelText: 'Dirección de Referencia (Avenida/Calle)',
+                labelText: 'Dirección de Entrega',
+                helperText: 'Actualizada automáticamente desde el mapa',
               ),
+              readOnly: true,
             ),
             const SizedBox(height: 10),
             TextField(

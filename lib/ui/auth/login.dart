@@ -13,23 +13,22 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final RegExp _emailRegExp = RegExp(
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+  );
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   void _login() async {
+    // Validate form first
+    if (!_formKey.currentState!.validate()) {
+      return; // Stop if validation fails
+    }
+
     final authLogic = Provider.of<AuthLogic>(context, listen: false);
     var email = _emailController.text.trim();
     var password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Complete todos los campos para iniciar sesión'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
 
     try {
       await authLogic.signIn(email, password);
@@ -78,9 +77,11 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
               // Logo o nombre de la tienda
               Text(
                 'CASA DE LAS JOYAS',
@@ -93,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 32),
 
               // Email
-              TextField(
+              TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
@@ -105,11 +106,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderSide: BorderSide.none),
                 ),
                 keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingresa tu email';
+                  }
+                  if (!_emailRegExp.hasMatch(value)) {
+                    return 'Por favor ingresa un email válido';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 
               // Contraseña
-              TextField(
+              TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Contraseña',
@@ -121,6 +131,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderSide: BorderSide.none),
                 ),
                 obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingresa tu contraseña';
+                  }
+                  if (value.length < 6) {
+                    return 'La contraseña debe tener al menos 6 caracteres';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 24),
 
@@ -186,6 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               )
             ],
+            ),
           ),
         ),
       ),

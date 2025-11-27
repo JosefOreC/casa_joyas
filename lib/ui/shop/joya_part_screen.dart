@@ -12,6 +12,9 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:casa_joyas/ui/auth/login.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:casa_joyas/services/directions_service.dart';
+import 'package:casa_joyas/ui/maps/route_map_screen.dart';
 
 class JoyaPartScreen extends StatefulWidget {
   const JoyaPartScreen({super.key});
@@ -27,6 +30,11 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
 
   // URL exacta que deseas lanzar al presionar el mapa estático
   final String _mapLaunchUrl = 'https://maps.app.goo.gl/LM81Aj7shPsdfCLY6';
+
+  // Variables para Directions API
+  Position? _currentPosition;
+  DirectionsResponse? _directions;
+  bool _isLoadingDirections = false;
 
   @override
   void initState() {
@@ -84,6 +92,121 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
             content: Text(
               'No se pudo abrir el mapa. Revise la URL o la configuración.',
             ),
+          ),
+        );
+      }
+    }
+  }
+
+  // --- FUNCIÓN: Obtener ubicación actual del usuario ---
+  Future<void> _getUserLocation() async {
+    // 1. Verificar si el servicio de ubicación está habilitado
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Por favor habilita el servicio de ubicación'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    // 2. Verificar permisos
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Permiso de ubicación denegado'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Los permisos de ubicación están permanentemente denegados. '
+              'Por favor habilítalos en la configuración de la app.',
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+      return;
+    }
+
+    // 3. Obtener posición actual
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    setState(() {
+      _currentPosition = position;
+    });
+  }
+
+  // --- FUNCIÓN: Obtener direcciones usando Google Directions API ---
+  Future<void> _fetchDirections() async {
+    if (_currentPosition == null) {
+      await _getUserLocation();
+      if (_currentPosition == null) return;
+    }
+
+    setState(() {
+      _isLoadingDirections = true;
+    });
+
+    try {
+      final directionsService = DirectionsService();
+
+      final response = await directionsService.getDirections(
+        origin: LatLng(
+          _currentPosition!.latitude,
+          _currentPosition!.longitude,
+        ),
+        destination: _storeLocation,
+        mode: 'driving',
+      );
+
+      setState(() {
+        _directions = response;
+        _isLoadingDirections = false;
+      });
+
+      // Navegar a la nueva pantalla del mapa
+      if (response != null && mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => RouteMapScreen(
+              directionsData: response,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoadingDirections = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al obtener direcciones: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -184,11 +307,21 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
           fontSize: 18,
         ),
         actions: [
-          // Botón Pin Drop: Abre el cuadro de diálogo
+          // Botón Pin Drop: Obtiene direcciones con Google Directions API
           IconButton(
-            icon: const Icon(Icons.pin_drop),
+            icon: _isLoadingDirections
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(Icons.pin_drop),
             color: Colors.white,
-            onPressed: () => _showStoreLocationDialog(context),
+            onPressed: _isLoadingDirections ? null : () => _fetchDirections(),
+            tooltip: 'Cómo llegar a la tienda',
           ),
 
           // Ícono de notificaciones con badge

@@ -7,6 +7,7 @@ import 'package:casa_joyas/modelo/products/order.dart'; // NECESARIO
 import 'package:casa_joyas/ui/shop/main_screen.dart';
 import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
 import 'package:casa_joyas/ui/auth/login.dart';
+import 'package:casa_joyas/ui/shop/jewelry_search_screen.dart';
 
 class PedidosScreen extends StatelessWidget {
   // Eliminamos la dependencia directa de AuthLogic en el constructor y la obtenemos por Provider.
@@ -172,6 +173,18 @@ class PedidosScreen extends StatelessWidget {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const JewelrySearchScreen(),
+            ),
+          );
+        },
+        backgroundColor: const Color.fromARGB(255, 47, 1, 214),
+        icon: const Icon(Icons.camera_alt),
+        label: const Text('Buscar por Foto'),
       ),
     );
   }
