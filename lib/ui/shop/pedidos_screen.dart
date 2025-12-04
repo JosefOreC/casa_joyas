@@ -160,7 +160,8 @@ class PedidosScreen extends StatelessWidget {
             ),
           );
         },
-        backgroundColor: AppColors.violetDark,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.camera_alt),
         label: const Text('Buscar por Foto'),
       ),

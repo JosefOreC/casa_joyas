@@ -19,10 +19,10 @@ abstract class UserCRUDLogic {
     required String nombre,
     String? numero,
   });
-  Future<User?> signInUser({
-    required String email,
-    required String password,
-  });
+  Future<User?> signInUser({required String email, required String password});
 
   Future<User?> signInWithGoogle(fb.User firebaseUser);
+
+  /// Actualizar foto de perfil del usuario
+  Future<void> updateUserPhoto(String userId, String photoUrl);
 }

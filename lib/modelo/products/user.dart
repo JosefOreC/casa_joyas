@@ -1,8 +1,4 @@
-enum UserRole {
-  administrador,
-  empleado,
-  cliente,
-}
+enum UserRole { administrador, empleado, cliente }
 
 class User {
   final String id;
@@ -10,6 +6,7 @@ class User {
   final String email;
   final String password;
   final String? numero;
+  final String? photoUrl; // Campo para la foto de perfil
   final UserRole rol;
 
   User({
@@ -18,6 +15,7 @@ class User {
     required this.email,
     required this.password,
     this.numero,
+    this.photoUrl,
     this.rol = UserRole.cliente,
   });
 
@@ -32,8 +30,9 @@ class User {
       id: id,
       nombre: data['nombre'] ?? '',
       email: data['email'] ?? '',
-      password: data['password'] ?? '', 
+      password: data['password'] ?? '',
       numero: data['numero'],
+      photoUrl: data['photoUrl'],
       rol: userRol,
     );
   }
@@ -43,6 +42,7 @@ class User {
       'nombre': nombre,
       'email': email,
       'numero': numero,
+      'photoUrl': photoUrl,
       'rol': rol.name,
       'password': password,
     };
@@ -50,13 +50,22 @@ class User {
 }
 
 extension UserCopyExtension on User {
-  User copyWith({String? id, String? nombre, String? email, String? password, String? numero, UserRole? rol}) {
+  User copyWith({
+    String? id,
+    String? nombre,
+    String? email,
+    String? password,
+    String? numero,
+    String? photoUrl,
+    UserRole? rol,
+  }) {
     return User(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
       email: email ?? this.email,
       password: password ?? this.password,
       numero: numero ?? this.numero,
+      photoUrl: photoUrl ?? this.photoUrl,
       rol: rol ?? this.rol,
     );
   }

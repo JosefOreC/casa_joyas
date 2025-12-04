@@ -16,7 +16,10 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
 
   @override
   Future<User?> read(String id) async {
-    final docSnapshot = await _firestore.collection(_collectionName).doc(id).get();
+    final docSnapshot = await _firestore
+        .collection(_collectionName)
+        .doc(id)
+        .get();
     if (docSnapshot.exists) {
       return User.fromMap(docSnapshot.data()!, docSnapshot.id);
     }
@@ -26,12 +29,17 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
   @override
   Future<List<User>> readAll() async {
     final querySnapshot = await _firestore.collection(_collectionName).get();
-    return querySnapshot.docs.map((doc) => User.fromMap(doc.data(), doc.id)).toList();
+    return querySnapshot.docs
+        .map((doc) => User.fromMap(doc.data(), doc.id))
+        .toList();
   }
 
   @override
   Future<void> update(User user) async {
-    await _firestore.collection(_collectionName).doc(user.id).update(user.toMap());
+    await _firestore
+        .collection(_collectionName)
+        .doc(user.id)
+        .update(user.toMap());
   }
 
   @override
@@ -57,7 +65,6 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
     required String nombre,
     String? numero,
   }) async {
-
     // 🔥 Crear usuario en FirebaseAuth
     final authResult = await fb.FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
@@ -79,8 +86,6 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
     return newUser;
   }
 
-
-  
   @override
   Future<bool> existsEmail(String email) async {
     final result = await _firestore
@@ -116,7 +121,10 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
       final userData = querySnapshot.docs.first;
       final storedPassword = userData.data()['password'] as String?;
       if (storedPassword == password) {
-        return User.fromMap(userData.data(), userData.id).copyWith(password: '');
+        return User.fromMap(
+          userData.data(),
+          userData.id,
+        ).copyWith(password: '');
       }
     }
     throw Exception('Credenciales inválidas.');
@@ -124,7 +132,8 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
 
   @override
   Future<User> signInWithGoogle(fb.User firebaseUser) async {
-    if (firebaseUser.email == null) throw Exception("El usuario no tiene email");
+    if (firebaseUser.email == null)
+      throw Exception("El usuario no tiene email");
 
     final querySnapshot = await _firestore
         .collection('users')
@@ -152,7 +161,10 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
   @override
   Future<User?> getUserById(String uid) async {
     try {
-      final docSnapshot = await _firestore.collection(_collectionName).doc(uid).get();
+      final docSnapshot = await _firestore
+          .collection(_collectionName)
+          .doc(uid)
+          .get();
       if (!docSnapshot.exists) return null;
       return User.fromMap(docSnapshot.data()!, docSnapshot.id);
     } catch (e) {
@@ -161,4 +173,14 @@ class FirebaseUserCRUDLogic implements UserCRUDLogic {
     }
   }
 
+  @override
+  Future<void> updateUserPhoto(String userId, String photoUrl) async {
+    try {
+      await _firestore.collection(_collectionName).doc(userId).update({
+        'photoUrl': photoUrl,
+      });
+    } catch (e) {
+      throw Exception('Error al actualizar la foto de perfil: $e');
+    }
+  }
 }

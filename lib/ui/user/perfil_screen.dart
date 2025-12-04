@@ -1,15 +1,109 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:casa_joyas/ui/shop/main_screen.dart';
 import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
+import 'package:casa_joyas/logica/firebase_storage_service.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/ui/auth/login.dart';
 import 'package:casa_joyas/core/theme/app_colors.dart';
 import 'package:casa_joyas/ui/user/settings_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
-class PerfilScreen extends StatelessWidget {
+class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
+
+  @override
+  State<PerfilScreen> createState() => _PerfilScreenState();
+}
+
+class _PerfilScreenState extends State<PerfilScreen> {
+  final FirebaseStorageService _storageService = FirebaseStorageService();
+  final ImagePicker _picker = ImagePicker();
+  bool _uploading = false;
+
+  Future<void> _pickAndUploadPhoto(
+    BuildContext context,
+    AuthLogic authLogic,
+  ) async {
+    // Mostrar diálogo para seleccionar fuente
+    final ImageSource? source = await showDialog<ImageSource>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Seleccionar foto de perfil'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Tomar foto'),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Seleccionar de galería'),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    // Seleccionar imagen
+    final XFile? image = await _picker.pickImage(
+      source: source,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 85,
+    );
+
+    if (image == null) return;
+
+    setState(() {
+      _uploading = true;
+    });
+
+    try {
+      final File imageFile = File(image.path);
+      final userId = authLogic.currentUser!.id;
+
+      // Subir a Firebase Storage
+      final photoUrl = await _storageService.uploadProfilePhoto(
+        imageFile,
+        userId,
+      );
+
+      // Actualizar perfil del usuario en Firestore
+      await authLogic.updateUserPhoto(photoUrl);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Foto de perfil actualizada'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al subir la foto: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _uploading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,14 +196,57 @@ class PerfilScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
       child: Column(
         children: [
-          // Foto y nombre
-          CircleAvatar(
-            radius: 55,
-            backgroundColor: AppColors.violetPrimary,
-            child: Text(
-              user.nombre.isNotEmpty ? user.nombre[0].toUpperCase() : "?",
-              style: const TextStyle(fontSize: 45, color: Colors.white),
-            ),
+          // Foto y nombre con botón de editar
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 55,
+                backgroundImage:
+                    user.photoUrl != null && user.photoUrl!.isNotEmpty
+                    ? NetworkImage(user.photoUrl!)
+                    : null,
+                backgroundColor: AppColors.violetPrimary,
+                child: user.photoUrl == null || user.photoUrl!.isEmpty
+                    ? Text(
+                        user.nombre.isNotEmpty
+                            ? user.nombre[0].toUpperCase()
+                            : "?",
+                        style: const TextStyle(
+                          fontSize: 45,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              ),
+              if (_uploading)
+                Positioned.fill(
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Colors.black54,
+                    child: const CircularProgressIndicator(color: Colors.white),
+                  ),
+                ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () => _pickAndUploadPhoto(context, authLogic),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.goldPrimary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
@@ -206,10 +343,19 @@ class PerfilScreen extends StatelessWidget {
               ),
               label: const Text(
                 'Cerrar sesión',
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               onPressed: () async {
                 await authLogic.signOut();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Sesión cerrada")),
+                  );
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MainScreen()),
+                  );
+                }
               },
             ),
           ),
@@ -218,43 +364,63 @@ class PerfilScreen extends StatelessWidget {
     );
   }
 
-  /// Widget reutilizable para cada item de información
-  Widget _itemTile(IconData icon, String title, String value) {
-    return Column(
-      children: [
-        ListTile(
-          leading: Icon(icon, color: AppColors.goldPrimary),
-          title: Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          subtitle: Text(value, style: const TextStyle(fontSize: 15)),
-        ),
-        const Divider(height: 1),
-      ],
+  Widget _itemTile(IconData icon, String label, String value) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.goldPrimary),
+      title: Text(label),
+      subtitle: Text(value),
     );
   }
 
-  // 🔶 Vista cuando NO hay usuario logueado
   Widget _buildNoSession(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.lock_outline, size: 100, color: Colors.grey),
-        const SizedBox(height: 20),
-        const Text("No has iniciado sesión", style: TextStyle(fontSize: 20)),
-        const SizedBox(height: 20),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.login),
-          label: const Text("Iniciar sesión"),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-            );
-          },
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.person_off_outlined, size: 80, color: Colors.grey[400]),
+          const SizedBox(height: 20),
+          Text(
+            'Debes iniciar sesión',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Para ver tu perfil y acceder a todas las funciones, inicia sesión o regístrate.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 30),
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.login),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.goldPrimary,
+                foregroundColor: AppColors.violetDark,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              label: const Text(
+                'Iniciar sesión',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

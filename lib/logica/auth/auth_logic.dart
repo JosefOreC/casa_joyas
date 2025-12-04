@@ -60,7 +60,6 @@ class AuthLogic extends ChangeNotifier {
       }
 
       isAuthenticated = true;
-
     } on fb.FirebaseAuthException catch (e) {
       throw Exception(_firebaseErrorMessage(e));
     } catch (e) {
@@ -112,8 +111,7 @@ class AuthLogic extends ChangeNotifier {
       );
 
       // Inicia sesión en Firebase
-      final userCredential =
-          await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
 
       final fbUser = userCredential.user!;
 
@@ -143,7 +141,6 @@ class AuthLogic extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 
   // ===========================================================
   //                   REGISTRO COMPLETO
@@ -192,16 +189,34 @@ class AuthLogic extends ChangeNotifier {
 
       _currentUser = newUser;
       isAuthenticated = true;
-
     } on fb.FirebaseAuthException catch (e) {
       throw Exception(_firebaseErrorMessage(e));
-
     } catch (e) {
       throw Exception("Error en registro: $e");
-
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  // ===========================================================
+  //            UPDATE USER PHOTO
+  // ===========================================================
+  Future<void> updateUserPhoto(String photoUrl) async {
+    if (_currentUser == null) {
+      throw Exception("No hay usuario autenticado");
+    }
+
+    try {
+      // Actualizar en Firestore
+      await _userRepo.updateUserPhoto(_currentUser!.id, photoUrl);
+
+      // Actualizar en memoria
+      _currentUser = _currentUser!.copyWith(photoUrl: photoUrl);
+
+      notifyListeners();
+    } catch (e) {
+      throw Exception("Error al actualizar la foto: $e");
     }
   }
 
