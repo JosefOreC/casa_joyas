@@ -8,6 +8,7 @@ import 'package:casa_joyas/ui/shop/main_screen.dart';
 import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
 import 'package:casa_joyas/ui/auth/login.dart';
 import 'package:casa_joyas/ui/shop/jewelry_search_screen.dart';
+import 'package:casa_joyas/ui/shop/receipt_screen.dart';
 import 'package:casa_joyas/core/theme/app_colors.dart';
 
 class PedidosScreen extends StatelessWidget {
@@ -353,6 +354,30 @@ class PedidosScreen extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+
+          // Botón Ver Boleta
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ReceiptScreen(order: order),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.receipt_long),
+                label: const Text('Ver Boleta'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: BorderSide(color: AppColors.goldPrimary),
+                  foregroundColor: AppColors.goldPrimary,
+                ),
+              ),
             ),
           ),
         ],
