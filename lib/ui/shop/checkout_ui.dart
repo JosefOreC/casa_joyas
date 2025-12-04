@@ -69,7 +69,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         });
       } else {
         setState(() {
-          _translatedAddress = 'No se encontró dirección para estas coordenadas.';
+          _translatedAddress =
+              'No se encontró dirección para estas coordenadas.';
           _addressController.text = 'Dirección no disponible';
         });
       }
@@ -185,7 +186,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (_deliveryType == 'delivery' && _addressController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor, seleccione una ubicación de entrega en el mapa.'),
+          content: Text(
+            'Por favor, seleccione una ubicación de entrega en el mapa.',
+          ),
         ),
       );
       return;
@@ -245,7 +248,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       appBar: AppBar(
         title: const Text('Confirmar Pedido y Pago'),
         foregroundColor: Colors.white,
-        backgroundColor: const Color.fromARGB(255, 36, 15, 230),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -311,10 +313,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       markerId: const MarkerId('delivery_location'),
                       position: _deliveryLocation,
                       draggable: _deliveryType == 'delivery',
-                      onDragEnd: _deliveryType == 'delivery' ? _onMarkerDragged : null,
+                      onDragEnd: _deliveryType == 'delivery'
+                          ? _onMarkerDragged
+                          : null,
                       icon: _deliveryType == 'store_pickup'
-                          ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)
-                          : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+                          ? BitmapDescriptor.defaultMarkerWithHue(
+                              BitmapDescriptor.hueRed,
+                            )
+                          : BitmapDescriptor.defaultMarkerWithHue(
+                              BitmapDescriptor.hueBlue,
+                            ),
                       infoWindow: InfoWindow(
                         title: _deliveryType == 'store_pickup'
                             ? 'Casa de las Joyas'
@@ -362,11 +370,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _deliveryType == 'delivery' ? _getCurrentLocation : null,
+                onPressed: _deliveryType == 'delivery'
+                    ? _getCurrentLocation
+                    : null,
                 icon: const Icon(Icons.my_location),
                 label: const Text('Usar Ubicación Actual'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _deliveryType == 'delivery' ? Colors.orange : Colors.grey,
+                  backgroundColor: _deliveryType == 'delivery'
+                      ? Colors.orange
+                      : Colors.grey,
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -461,7 +473,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       : 'CONFIRMAR Y PAGAR',
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 36, 15, 230),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   textStyle: const TextStyle(fontSize: 18),

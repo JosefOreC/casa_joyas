@@ -82,7 +82,9 @@ class _JewelrySearchScreenState extends State<JewelrySearchScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('¡Solicitud enviada con éxito! Le notificaremos cuando la joya esté disponible.'),
+            content: Text(
+              '¡Solicitud enviada con éxito! Le notificaremos cuando la joya esté disponible.',
+            ),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 4),
           ),
@@ -114,7 +116,6 @@ class _JewelrySearchScreenState extends State<JewelrySearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Buscar Joya por Foto'),
-        backgroundColor: const Color.fromARGB(255, 47, 1, 214),
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -201,7 +202,9 @@ class _JewelrySearchScreenState extends State<JewelrySearchScreen> {
             ElevatedButton.icon(
               onPressed: _isUploading ? null : _takePicture,
               icon: const Icon(Icons.camera_alt),
-              label: Text(_imageFile == null ? 'Tomar Foto' : 'Tomar Otra Foto'),
+              label: Text(
+                _imageFile == null ? 'Tomar Foto' : 'Tomar Otra Foto',
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[700],
                 foregroundColor: Colors.white,
@@ -227,7 +230,6 @@ class _JewelrySearchScreenState extends State<JewelrySearchScreen> {
                   : const Icon(Icons.send),
               label: Text(_isUploading ? 'Enviando...' : 'Enviar Solicitud'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 47, 1, 214),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 textStyle: const TextStyle(fontSize: 18),

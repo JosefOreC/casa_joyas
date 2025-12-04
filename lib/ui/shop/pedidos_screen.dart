@@ -30,7 +30,6 @@ class PedidosScreen extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           title: const Text('HISTORIAL DE PEDIDOS'),
-          backgroundColor: const Color.fromARGB(255, 47, 1, 214),
           foregroundColor: Colors.white,
         ),
         body: const Center(
@@ -49,7 +48,6 @@ class PedidosScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('HISTORIAL DE PEDIDOS'),
-        backgroundColor: AppColors.violetDark,
         foregroundColor: AppColors.white,
         actions: [
           Stack(

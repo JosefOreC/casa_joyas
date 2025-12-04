@@ -7,10 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 class RouteMapScreen extends StatefulWidget {
   final DirectionsResponse directionsData;
 
-  const RouteMapScreen({
-    super.key,
-    required this.directionsData,
-  });
+  const RouteMapScreen({super.key, required this.directionsData});
 
   @override
   State<RouteMapScreen> createState() => _RouteMapScreenState();
@@ -68,9 +65,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   void _fitBounds() {
     // Ajustar la cámara para mostrar toda la ruta
     final bounds = _calculateBounds();
-    _mapController?.animateCamera(
-      CameraUpdate.newLatLngBounds(bounds, 100),
-    );
+    _mapController?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
   }
 
   LatLngBounds _calculateBounds() {
@@ -94,10 +89,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cómo Llegar'),
-        backgroundColor: const Color.fromARGB(255, 47, 1, 214),
-      ),
+      appBar: AppBar(title: const Text('Cómo Llegar')),
       body: Stack(
         children: [
           // Mapa
@@ -115,12 +107,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
           ),
 
           // Panel de información inferior
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _buildInfoPanel(),
-          ),
+          Positioned(bottom: 0, left: 0, right: 0, child: _buildInfoPanel()),
         ],
       ),
     );
@@ -231,13 +218,7 @@ class _RouteMapScreenState extends State<RouteMapScreen> {
         children: [
           Icon(icon, color: color, size: 24),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
           const SizedBox(height: 2),
           Text(
             value,

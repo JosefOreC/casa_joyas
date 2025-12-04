@@ -439,7 +439,9 @@ class _CatalogoJoyasScreenState extends State<CatalogoJoyasScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          joya.stock == 0 ? 'AGOTADO' : '¡${joya.stock} left!',
+                          joya.stock == 0
+                              ? 'AGOTADO'
+                              : '¡Quedan ${joya.stock} uds!',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,

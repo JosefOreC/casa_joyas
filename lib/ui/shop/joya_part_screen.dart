@@ -174,10 +174,7 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
       final directionsService = DirectionsService();
 
       final response = await directionsService.getDirections(
-        origin: LatLng(
-          _currentPosition!.latitude,
-          _currentPosition!.longitude,
-        ),
+        origin: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
         destination: _storeLocation,
         mode: 'driving',
       );
@@ -191,9 +188,7 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
       if (response != null && mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => RouteMapScreen(
-              directionsData: response,
-            ),
+            builder: (context) => RouteMapScreen(directionsData: response),
           ),
         );
       }
@@ -301,7 +296,6 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('CASA DE LAS JOYAS'),
-        backgroundColor: const Color.fromARGB(255, 47, 1, 214),
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 18,
