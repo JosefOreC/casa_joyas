@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:casa_joyas/ui/shop/client_home.dart';
+import 'package:casa_joyas/core/theme/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -59,8 +60,9 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF2F01D6), // Deep Purple
-              Color(0xFF7E57C2), // Lighter Purple
+              AppColors.violetDark,
+              AppColors.violetPrimary,
+              AppColors.violetLight,
             ],
           ),
         ),
@@ -77,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen>
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
-                    'assets/images/app_icon.png',
+                    'assets/images/icono.png',
                     width: 100,
                     height: 100,
                   ),

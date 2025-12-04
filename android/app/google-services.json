@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "515728386769-t6g7mfbl1p9tbuc90p795vig3cbaeu9h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.casa_joyas",
+            "certificate_hash": "3a523ba7fa68b2d2b86b92f68a3205cfc5f469af"
+          }
+        },
+        {
           "client_id": "515728386769-1edm0j8db5dnorib8dhmlt53f85bkh4c.apps.googleusercontent.com",
           "client_type": 3
         }

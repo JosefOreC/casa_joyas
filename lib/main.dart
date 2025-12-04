@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/firebase_options.dart';
 import 'package:casa_joyas/ui/splash/splash_screen.dart';
+import 'package:casa_joyas/core/theme/app_theme.dart';
+import 'package:casa_joyas/core/theme/theme_provider.dart';
 
 import 'package:casa_joyas/modelo/database/crud_user.dart';
 import 'package:casa_joyas/modelo/database/crud_joya.dart';
@@ -41,6 +43,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         Provider<UserCRUDLogic>(create: (_) => FirebaseUserCRUDLogic()),
         Provider<JoyaCRUDLogic>(create: (_) => FirebaseJoyaCRUDLogic()),
         Provider<OrderCRUDLogic>(create: (_) => FirebaseOrderCRUDLogic()),
@@ -89,13 +92,18 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ],
-      child: MaterialApp(
-        title: 'CASA DE LAS JOYAS',
-        theme: ThemeData(
-          primarySwatch: Colors.deepPurple,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: const SplashScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'CASA DE LAS JOYAS',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.isDarkMode
+                ? ThemeMode.dark
+                : ThemeMode.light,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 import 'package:casa_joyas/modelo/products/order.dart';
-import 'package:casa_joyas/ui/shop/checkout_ui.dart'; 
-
+import 'package:casa_joyas/ui/shop/checkout_ui.dart';
+import 'package:casa_joyas/core/theme/app_colors.dart';
 
 class ShoppingCartScreen extends StatelessWidget {
   const ShoppingCartScreen({super.key});
@@ -11,8 +11,10 @@ class ShoppingCartScreen extends StatelessWidget {
   void _showOrderSuccess(BuildContext context, String orderId) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Pedido realizado con éxito! ID: ${orderId.substring(0, 8)}...'),
-        backgroundColor: Colors.green,
+        content: Text(
+          'Pedido realizado con éxito! ID: ${orderId.substring(0, 8)}...',
+        ),
+        backgroundColor: AppColors.success,
         duration: const Duration(seconds: 4),
       ),
     );
@@ -22,18 +24,18 @@ class ShoppingCartScreen extends StatelessWidget {
     if (cartLogic.items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('El carrito está vacío. Agregue productos para continuar.'),
-          backgroundColor: Colors.orange,
+          content: Text(
+            'El carrito está vacío. Agregue productos para continuar.',
+          ),
+          backgroundColor: AppColors.warning,
         ),
       );
       return;
     }
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const CheckoutScreen(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const CheckoutScreen()));
   }
 
   // Función que fuerza la verificación de stock para la sección de checkout
@@ -41,29 +43,41 @@ class ShoppingCartScreen extends StatelessWidget {
     if (cartLogic.items.isEmpty) return;
     // Esperamos a que todas las consultas de stock terminen.
     await Future.wait(
-      cartLogic.items.map((item) => cartLogic.isItemInStock(item))
+      cartLogic.items.map((item) => cartLogic.isItemInStock(item)),
     );
   }
 
   // Confirma y Elimina el Ítem del Carrito
-  void _confirmAndRemoveItem(BuildContext context, ShoppingCartLogic cartLogic, OrderItem item) async {
+  void _confirmAndRemoveItem(
+    BuildContext context,
+    ShoppingCartLogic cartLogic,
+    OrderItem item,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirmar Eliminación'),
-        content: Text('¿Estás seguro de que deseas eliminar "${item.joyaNombre}" del carrito?'),
+        content: Text(
+          '¿Estás seguro de que deseas eliminar "${item.joyaNombre}" del carrito?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Eliminar', style: TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Eliminar', style: TextStyle(color: AppColors.error)),
+          ),
         ],
       ),
     );
 
     if (confirm == true) {
-      cartLogic.removeItem(item.joyaId); 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${item.joyaNombre} eliminado.')),
-      );
+      cartLogic.removeItem(item.joyaId);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${item.joyaNombre} eliminado.')));
     }
   }
 
@@ -74,8 +88,8 @@ class ShoppingCartScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('CASA DE LAS JOYAS'),
-        foregroundColor: Colors.white,
-        backgroundColor: const Color.fromARGB(255, 36, 15, 230),
+        foregroundColor: AppColors.white,
+        backgroundColor: AppColors.violetDark,
       ),
       body: cartLogic.items.isEmpty
           ? const Center(
@@ -91,24 +105,41 @@ class ShoppingCartScreen extends StatelessWidget {
                     itemCount: cartLogic.items.length,
                     itemBuilder: (context, index) {
                       final item = cartLogic.items[index];
-                      
+
                       // 🔧 FIX: Cargar el stock para cada item antes de mostrarlo
                       return FutureBuilder<bool>(
                         future: cartLogic.isItemInStock(item),
                         builder: (context, snapshot) {
                           // Mientras carga, mostrar el item con estado de carga
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            final stockAvailable = cartLogic.getStockForItem(item.joyaId);
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            final stockAvailable = cartLogic.getStockForItem(
+                              item.joyaId,
+                            );
                             // Si no hay stock cargado aún, asumimos que está en stock hasta que se verifique
-                            final inStock = stockAvailable == 0 ? true : item.cantidad <= stockAvailable;
-                            return _buildCartItem(context, cartLogic, item, inStock);
+                            final inStock = stockAvailable == 0
+                                ? true
+                                : item.cantidad <= stockAvailable;
+                            return _buildCartItem(
+                              context,
+                              cartLogic,
+                              item,
+                              inStock,
+                            );
                           }
-                          
+
                           // Una vez cargado, usar el stock actualizado
-                          final stockAvailable = cartLogic.getStockForItem(item.joyaId);
+                          final stockAvailable = cartLogic.getStockForItem(
+                            item.joyaId,
+                          );
                           final inStock = item.cantidad <= stockAvailable;
-                          
-                          return _buildCartItem(context, cartLogic, item, inStock);
+
+                          return _buildCartItem(
+                            context,
+                            cartLogic,
+                            item,
+                            inStock,
+                          );
                         },
                       );
                     },
@@ -116,7 +147,7 @@ class ShoppingCartScreen extends StatelessWidget {
                 ),
                 // FutureBuilder principal que garantiza que el stock esté disponible
                 FutureBuilder(
-                  future: _checkAllStock(cartLogic), 
+                  future: _checkAllStock(cartLogic),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Padding(
@@ -132,13 +163,18 @@ class ShoppingCartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCartItem(BuildContext context, ShoppingCartLogic cartLogic, OrderItem item, bool inStock) {
+  Widget _buildCartItem(
+    BuildContext context,
+    ShoppingCartLogic cartLogic,
+    OrderItem item,
+    bool inStock,
+  ) {
     final opacity = inStock ? 1.0 : 0.5;
     final stockMensaje = inStock ? 'En Stock' : 'AGOTADO';
-    final stockColor = inStock ? Colors.green : Colors.red;
-    
+    final stockColor = inStock ? AppColors.success : AppColors.error;
+
     final stockAvailable = cartLogic.getStockForItem(item.joyaId);
-    final canIncrement = inStock && item.cantidad < stockAvailable; 
+    final canIncrement = inStock && item.cantidad < stockAvailable;
 
     return Opacity(
       opacity: opacity,
@@ -156,24 +192,41 @@ class ShoppingCartScreen extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            child: !inStock 
+            child: !inStock
                 ? const Center(
-                    child: Icon(Icons.do_not_disturb_alt, color: Colors.white, size: 30),
+                    child: Icon(
+                      Icons.do_not_disturb_alt,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                   )
                 : null,
           ),
-          
-          title: Text(item.joyaNombre, style: const TextStyle(fontWeight: FontWeight.bold)),
+
+          title: Text(
+            item.joyaNombre,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Precio Unitario: S/. ${item.precioUnitario.toStringAsFixed(2)}'),
-              if (item.especificaciones != null && item.especificaciones!.isNotEmpty)
-                Text('Personalización: "${item.especificaciones}"', style: const TextStyle(color: Colors.blueGrey, fontSize: 12)),
-              
+              Text(
+                'Precio Unitario: S/. ${item.precioUnitario.toStringAsFixed(2)}',
+              ),
+              if (item.especificaciones != null &&
+                  item.especificaciones!.isNotEmpty)
+                Text(
+                  'Personalización: "${item.especificaciones}"',
+                  style: const TextStyle(color: Colors.blueGrey, fontSize: 12),
+                ),
+
               Text(
                 stockMensaje,
-                style: TextStyle(color: stockColor, fontWeight: FontWeight.bold, fontSize: 12),
+                style: TextStyle(
+                  color: stockColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -183,32 +236,42 @@ class ShoppingCartScreen extends StatelessWidget {
               // Botón de Decremento
               IconButton(
                 icon: const Icon(Icons.remove_circle_outline),
-                onPressed: inStock 
+                onPressed: inStock
                     ? () {
                         if (item.cantidad <= 1) {
-                            _confirmAndRemoveItem(context, cartLogic, item);
+                          _confirmAndRemoveItem(context, cartLogic, item);
                         } else {
-                            cartLogic.updateItemQuantity(item.joyaId, item.cantidad - 1);
+                          cartLogic.updateItemQuantity(
+                            item.joyaId,
+                            item.cantidad - 1,
+                          );
                         }
-                    }
-                    : null, 
+                      }
+                    : null,
               ),
-              
+
               // Cantidad
-              Text('${item.cantidad}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              
+              Text(
+                '${item.cantidad}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+
               // Botón de Incremento
               IconButton(
                 icon: const Icon(Icons.add_circle_outline),
                 onPressed: canIncrement
-                    ? () => cartLogic.updateItemQuantity(item.joyaId, item.cantidad + 1)
-                    : null, 
+                    ? () => cartLogic.updateItemQuantity(
+                        item.joyaId,
+                        item.cantidad + 1,
+                      )
+                    : null,
               ),
-              
+
               // Botón Eliminar (Tacho)
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _confirmAndRemoveItem(context, cartLogic, item), 
+                icon: Icon(Icons.delete, color: AppColors.error),
+                onPressed: () =>
+                    _confirmAndRemoveItem(context, cartLogic, item),
               ),
             ],
           ),
@@ -217,10 +280,18 @@ class ShoppingCartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCheckoutSection(BuildContext context, ShoppingCartLogic cartLogic) {
+  Widget _buildCheckoutSection(
+    BuildContext context,
+    ShoppingCartLogic cartLogic,
+  ) {
     // hasOutOfStockItem ahora usa data que fue consultada en _checkAllStock
-    final hasOutOfStockItem = cartLogic.items.any((item) => item.cantidad > cartLogic.getStockForItem(item.joyaId));
-    final canPlaceOrder = !cartLogic.isProcessingOrder && !hasOutOfStockItem && cartLogic.items.isNotEmpty;
+    final hasOutOfStockItem = cartLogic.items.any(
+      (item) => item.cantidad > cartLogic.getStockForItem(item.joyaId),
+    );
+    final canPlaceOrder =
+        !cartLogic.isProcessingOrder &&
+        !hasOutOfStockItem &&
+        cartLogic.items.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -234,20 +305,30 @@ class ShoppingCartScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('TOTAL:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'TOTAL:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               Text(
                 'S/. ${cartLogic.total.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 36, 15, 230)),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.goldDark,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
           if (hasOutOfStockItem)
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(bottom: 8.0),
               child: Text(
                 '❌ Uno o más artículos tienen stock insuficiente. Actualice el carrito.',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           SizedBox(
@@ -255,14 +336,25 @@ class ShoppingCartScreen extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: canPlaceOrder
                   ? () => _placeOrder(context, cartLogic)
-                  : null, 
+                  : null,
               icon: cartLogic.isProcessingOrder
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
                   : const Icon(Icons.payment),
-              label: Text(cartLogic.isProcessingOrder ? 'Procesando...' : 'FINALIZAR PEDIDO'),
+              label: Text(
+                cartLogic.isProcessingOrder
+                    ? 'Procesando...'
+                    : 'FINALIZAR PEDIDO',
+              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 36, 15, 230),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.goldPrimary,
+                foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
             ),

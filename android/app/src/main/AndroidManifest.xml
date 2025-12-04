@@ -16,7 +16,7 @@
     <application
         android:label="CASA DE LAS JOYAS"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@drawable/icono">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBIZrptkE0IGakPhzMzMpq4PaW_gw_D1vk" />

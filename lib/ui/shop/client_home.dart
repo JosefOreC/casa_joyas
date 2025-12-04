@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:casa_joyas/core/theme/app_colors.dart';
 import 'package:casa_joyas/logica/auth/auth_logic.dart';
 import 'package:casa_joyas/logica/products/notification_logic.dart';
 import 'package:casa_joyas/ui/shop/joya_part_screen.dart';
@@ -50,8 +51,8 @@ class _ClientHomeState extends State<ClientHome> {
             _selectedIndex = index;
           });
         },
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: AppColors.goldPrimary,
+        unselectedItemColor: AppColors.mediumGray,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.diamond_outlined),

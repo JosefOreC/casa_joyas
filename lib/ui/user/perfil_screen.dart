@@ -5,6 +5,8 @@ import 'package:casa_joyas/ui/shop/shopping_cart_ui.dart';
 import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 import 'package:provider/provider.dart';
 import 'package:casa_joyas/ui/auth/login.dart';
+import 'package:casa_joyas/core/theme/app_colors.dart';
+import 'package:casa_joyas/ui/user/settings_screen.dart';
 
 class PerfilScreen extends StatelessWidget {
   const PerfilScreen({super.key});
@@ -17,8 +19,6 @@ class PerfilScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('CASA DE LAS JOYAS'),
-        backgroundColor: const Color.fromARGB(255, 47, 1, 214),
-        foregroundColor: Colors.white,
         actions: [
           /// ICONO DEL CARRITO
           Stack(
@@ -49,10 +49,7 @@ class PerfilScreen extends StatelessWidget {
                     ),
                     child: Text(
                       '${cartLogic.items.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -62,15 +59,13 @@ class PerfilScreen extends StatelessWidget {
 
           /// ICONO LOGIN / LOGOUT
           IconButton(
-            icon: Icon(
-              authLogic.isAuthenticated ? Icons.logout : Icons.login,
-            ),
+            icon: Icon(authLogic.isAuthenticated ? Icons.logout : Icons.login),
             onPressed: () async {
               if (authLogic.isAuthenticated) {
                 await authLogic.signOut();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Sesión cerrada")),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text("Sesión cerrada")));
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const MainScreen()),
@@ -89,139 +84,151 @@ class PerfilScreen extends StatelessWidget {
       /// CONTENIDO DEL PERFIL
       body: Center(
         child: authLogic.isAuthenticated && authLogic.currentUser != null
-            ? _buildUserInfo(authLogic)
+            ? _buildUserInfo(context, authLogic)
             : _buildNoSession(context),
       ),
     );
   }
 
-  Widget _buildUserInfo(AuthLogic authLogic) {
-  final user = authLogic.currentUser!;
+  Widget _buildUserInfo(BuildContext context, AuthLogic authLogic) {
+    final user = authLogic.currentUser!;
 
-  return SingleChildScrollView(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-    child: Column(
-      children: [
-        // Foto y nombre
-        CircleAvatar(
-          radius: 55,
-          backgroundColor: const Color(0xFF304FFE),
-          child: Text(
-            user.nombre.isNotEmpty ? user.nombre[0].toUpperCase() : "?",
-            style: const TextStyle(fontSize: 45, color: Colors.white),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      child: Column(
+        children: [
+          // Foto y nombre
+          CircleAvatar(
+            radius: 55,
+            backgroundColor: AppColors.violetPrimary,
+            child: Text(
+              user.nombre.isNotEmpty ? user.nombre[0].toUpperCase() : "?",
+              style: const TextStyle(fontSize: 45, color: Colors.white),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-        Text(
-          user.nombre,
-          style: const TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-
-        const SizedBox(height: 8),
-        Text(
-          user.email,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black54,
-          ),
-        ),
-
-        if (user.numero != null && user.numero!.isNotEmpty) ...[
-          const SizedBox(height: 4),
           Text(
-            "Teléfono: ${user.numero}",
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black54,
+            user.nombre,
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 8),
+          Text(
+            user.email,
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+          ),
+
+          if (user.numero != null && user.numero!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              "Teléfono: ${user.numero}",
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+          ],
+
+          const SizedBox(height: 30),
+
+          // Card con información adicional
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                  color: Colors.black.withOpacity(0.1),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                _itemTile(Icons.person_outline, "Nombre", user.nombre),
+                _itemTile(Icons.email_outlined, "Correo", user.email),
+                if (user.numero != null)
+                  _itemTile(
+                    Icons.phone_android_outlined,
+                    "Número",
+                    user.numero!,
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // Settings Button
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.settings),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.goldPrimary,
+                foregroundColor: AppColors.violetDark,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              label: const Text(
+                'Configuración',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Botón cerrar sesión
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.exit_to_app),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              label: const Text(
+                'Cerrar sesión',
+                style: TextStyle(fontSize: 18),
+              ),
+              onPressed: () async {
+                await authLogic.signOut();
+              },
             ),
           ),
         ],
-
-        const SizedBox(height: 30),
-
-        // Card con información adicional
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-                color: Colors.black.withOpacity(0.1),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              _itemTile(Icons.person_outline, "Nombre", user.nombre),
-              _itemTile(Icons.email_outlined, "Correo", user.email),
-              if (user.numero != null)
-                _itemTile(Icons.phone_android_outlined, "Número", user.numero!),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 30),
-
-        // Botón cerrar sesión
-        SizedBox(
-          width: double.infinity,
-          height: 55,
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.exit_to_app),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            label: const Text(
-              'Cerrar sesión',
-              style: TextStyle(fontSize: 18),
-            ),
-            onPressed: () async {
-              await authLogic.signOut();
-            },
-          ),
-        ),
-      ],
-    ),
-  );
-}
+      ),
+    );
+  }
 
   /// Widget reutilizable para cada item de información
   Widget _itemTile(IconData icon, String title, String value) {
     return Column(
       children: [
         ListTile(
-          leading: Icon(icon, color: Colors.blueAccent),
+          leading: Icon(icon, color: AppColors.goldPrimary),
           title: Text(
             title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.black54,
-            ),
-          ),
+          subtitle: Text(value, style: const TextStyle(fontSize: 15)),
         ),
         const Divider(height: 1),
       ],
     );
   }
-
 
   // 🔶 Vista cuando NO hay usuario logueado
   Widget _buildNoSession(BuildContext context) {
@@ -230,10 +237,7 @@ class PerfilScreen extends StatelessWidget {
       children: [
         const Icon(Icons.lock_outline, size: 100, color: Colors.grey),
         const SizedBox(height: 20),
-        const Text(
-          "No has iniciado sesión",
-          style: TextStyle(fontSize: 20),
-        ),
+        const Text("No has iniciado sesión", style: TextStyle(fontSize: 20)),
         const SizedBox(height: 20),
         ElevatedButton.icon(
           icon: const Icon(Icons.login),
