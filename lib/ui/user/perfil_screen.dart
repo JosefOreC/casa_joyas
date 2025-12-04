@@ -18,7 +18,12 @@ class PerfilScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CASA DE LAS JOYAS'),
+        title: const Text('Casa de las Joyas'),
+        titleTextStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+          color: Colors.white,
+        ),
         actions: [
           /// ICONO DEL CARRITO
           Stack(

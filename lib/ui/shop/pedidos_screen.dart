@@ -29,7 +29,12 @@ class PedidosScreen extends StatelessWidget {
     if (userId == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('HISTORIAL DE PEDIDOS'),
+          title: const Text('Casa de las Joyas'),
+          titleTextStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: Colors.white,
+          ),
           foregroundColor: Colors.white,
         ),
         body: const Center(
@@ -47,7 +52,7 @@ class PedidosScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('HISTORIAL DE PEDIDOS'),
+        title: const Text('Casa de las Joyas'),
         foregroundColor: AppColors.white,
         actions: [
           Stack(

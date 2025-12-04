@@ -295,10 +295,11 @@ class _JoyaPartScreenState extends State<JoyaPartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CASA DE LAS JOYAS'),
+        title: const Text('Casa de las Joyas'),
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 18,
+          color: Colors.white,
         ),
         actions: [
           // Botón Pin Drop: Obtiene direcciones con Google Directions API

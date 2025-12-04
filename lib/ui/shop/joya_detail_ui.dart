@@ -19,7 +19,7 @@ class JoyaDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CASA DE LAS JOYAS'),
+        title: const Text('Casa de las Joyas'),
         foregroundColor: Colors.white,
         actions: [
           Stack(
@@ -182,20 +182,29 @@ class JoyaDetailScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        _showAddToCartModal(context, cartLogic);
-                      },
+                      onPressed: joya.stock > 0
+                          ? () {
+                              _showAddToCartModal(context, cartLogic);
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: joya.stock > 0
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        elevation: 3,
+                        elevation: joya.stock > 0 ? 3 : 0,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      icon: const Icon(Icons.add_shopping_cart, size: 26),
-                      label: const Text(
-                        'Agregar al Carrito',
-                        style: TextStyle(
+                      icon: Icon(
+                        joya.stock > 0 ? Icons.add_shopping_cart : Icons.block,
+                        size: 26,
+                      ),
+                      label: Text(
+                        joya.stock > 0 ? 'Agregar al Carrito' : 'Sin Stock',
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -382,60 +391,86 @@ class JoyaDetailScreen extends StatelessWidget {
     required String value,
     Color? valueColor,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: Colors.blue[700], size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: valueColor,
-                  ),
-                ),
-              ],
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[850] : Colors.grey[100],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+              width: 1,
             ),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            valueColor ??
+                            (isDark ? Colors.white : Colors.black87),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   void _showAddToCartModal(BuildContext context, ShoppingCartLogic cartLogic) {
+    // Validar stock
+    if (joya.stock == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Este producto no tiene stock disponible'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     int cantidad = 1;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? Colors.grey[900] : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -452,7 +487,7 @@ class JoyaDetailScreen extends StatelessWidget {
                     width: 50,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: isDark ? Colors.grey[700] : Colors.grey[300],
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -471,9 +506,10 @@ class JoyaDetailScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           joya.nombre,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                         ),
                       ),
@@ -484,7 +520,10 @@ class JoyaDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
+                        icon: Icon(
+                          Icons.remove_circle_outline,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
                         onPressed: () {
                           if (cantidad > 1) {
                             setState(() {
@@ -493,15 +532,34 @@ class JoyaDetailScreen extends StatelessWidget {
                           }
                         },
                       ),
-                      Text(
-                        '$cantidad',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.grey[700]!
+                                : Colors.grey[300]!,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          color: isDark ? Colors.grey[850] : Colors.grey[50],
+                        ),
+                        child: Text(
+                          '$cantidad',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
+                        icon: Icon(
+                          Icons.add_circle_outline,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
                         onPressed: () {
                           if (cantidad < joya.stock) {
                             setState(() {

@@ -4,6 +4,10 @@ import 'package:casa_joyas/logica/shopping_cart_logic/shopping_cart_logic.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:casa_joyas/ui/shop/receipt_screen.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -212,8 +216,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final order = await cartLogic.placeOrder();
 
       if (order != null && mounted) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        _showOrderSuccess(context, order.id);
+        // Navegar a la pantalla de boleta
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => ReceiptScreen(order: order)),
+          (route) => route.isFirst,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -295,7 +302,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Container(
               height: 250,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
+                border: Border.all(
+                  color: _deliveryType == 'delivery'
+                      ? Colors.blue
+                      : Colors.grey,
+                  width: _deliveryType == 'delivery' ? 3 : 1,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: ClipRRect(
@@ -308,6 +320,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     target: _deliveryLocation,
                     zoom: 15,
                   ),
+                  onTap: _deliveryType == 'delivery'
+                      ? (LatLng position) async {
+                          setState(() {
+                            _deliveryLocation = position;
+                          });
+                          await _translateCoordinatesToAddress(position);
+                        }
+                      : null,
                   markers: {
                     Marker(
                       markerId: const MarkerId('delivery_location'),
@@ -327,6 +347,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         title: _deliveryType == 'store_pickup'
                             ? 'Casa de las Joyas'
                             : 'Ubicación de entrega',
+                        snippet: _deliveryType == 'delivery'
+                            ? 'Arrastra o toca el mapa'
+                            : null,
                       ),
                     ),
                   },
@@ -334,9 +357,41 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,
                   mapToolbarEnabled: false,
+                  gestureRecognizers: _deliveryType == 'delivery'
+                      ? <Factory<OneSequenceGestureRecognizer>>{
+                          Factory<OneSequenceGestureRecognizer>(
+                            () => EagerGestureRecognizer(),
+                          ),
+                        }
+                      : {},
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+
+            // Instrucciones para el usuario
+            if (_deliveryType == 'delivery')
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue[200]!),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Toca el mapa o arrastra el marcador para seleccionar tu ubicación de entrega',
+                        style: TextStyle(fontSize: 13, color: Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             const SizedBox(height: 10),
             Text(
               'Coordenadas: Lat ${_deliveryLocation.latitude.toStringAsFixed(4)}, Lon ${_deliveryLocation.longitude.toStringAsFixed(4)}',
